@@ -1,11 +1,16 @@
 // MyScraper Content Script
 
-// Listen for messages from popup and sidebar
-window.addEventListener('message', (event) => {
+if (window.myScraperContentLoaded) {
+  // Script already injected, do not execute again.
+} else {
+  window.myScraperContentLoaded = true;
+
+  // Listen for messages from popup and sidebar
+  window.addEventListener('message', (event) => {
   if (event.source !== window || event.data.type !== 'myscraper_action') return;
-  
+
   const { action, params } = event.data;
-  
+
   switch (action) {
     case 'extractList':
       extractList();
@@ -39,7 +44,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.action === 'highlightElements') {
     const { type, color } = message;
     const result = detectDataTypes();
-    
+
     if (result[type] && result[type].elements.length > 0) {
       highlightElements(result[type].elements, color);
     }
@@ -77,22 +82,22 @@ let excludedElements = [];
 function startSelectionMode() {
   selectionMode = true;
   exclusionMode = false;
-  
+
   // Add event listeners for mouseover and click
   document.addEventListener('mouseover', handleSelectionMouseOver);
   document.addEventListener('click', handleSelectionClick);
-  
+
   showNotification('Selection mode enabled. Click on elements to select them.');
 }
 
 // Stop selection mode
 function stopSelectionMode() {
   selectionMode = false;
-  
+
   // Remove event listeners
   document.removeEventListener('mouseover', handleSelectionMouseOver);
   document.removeEventListener('click', handleSelectionClick);
-  
+
   showNotification('Selection mode disabled.');
 }
 
@@ -100,29 +105,29 @@ function stopSelectionMode() {
 function startExclusionMode() {
   exclusionMode = true;
   selectionMode = false;
-  
+
   // Add event listeners for mouseover and click
   document.addEventListener('mouseover', handleExclusionMouseOver);
   document.addEventListener('click', handleExclusionClick);
-  
+
   showNotification('Exclusion mode enabled. Click on elements to exclude them.');
 }
 
 // Stop exclusion mode
 function stopExclusionMode() {
   exclusionMode = false;
-  
+
   // Remove event listeners
   document.removeEventListener('mouseover', handleExclusionMouseOver);
   document.removeEventListener('click', handleExclusionClick);
-  
+
   showNotification('Exclusion mode disabled.');
 }
 
 // Handle mouse over during selection mode
 function handleSelectionMouseOver(e) {
   if (!selectionMode) return;
-  
+
   // Highlight the element under the mouse
   const element = e.target;
   highlightElements([element], '#4285f4');
@@ -131,16 +136,16 @@ function handleSelectionMouseOver(e) {
 // Handle click during selection mode
 function handleSelectionClick(e) {
   if (!selectionMode) return;
-  
+
   e.preventDefault();
   e.stopPropagation();
-  
+
   const element = e.target;
   const selector = generateSelector(element);
-  
+
   // Check if element is already selected
   const existingIndex = selectedElements.findIndex(el => el.selector === selector);
-  
+
   if (existingIndex === -1) {
     // Add to selected elements
     selectedElements.push({
@@ -148,10 +153,10 @@ function handleSelectionClick(e) {
       selector: selector,
       text: element.textContent.trim()
     });
-    
+
     // Highlight element
     highlightElements([element], '#4285f4');
-    
+
     // Send message to sidebar
     chrome.runtime.sendMessage({
       action: 'elementSelected',
@@ -165,10 +170,10 @@ function handleSelectionClick(e) {
   } else {
     // Remove from selected elements
     selectedElements.splice(existingIndex, 1);
-    
+
     // Remove highlight
     element.classList.remove('myscraper-selection-highlight');
-    
+
     // Send message to sidebar to update
     chrome.runtime.sendMessage({
       action: 'elementDeselected',
@@ -180,7 +185,7 @@ function handleSelectionClick(e) {
 // Handle mouse over during exclusion mode
 function handleExclusionMouseOver(e) {
   if (!exclusionMode) return;
-  
+
   // Highlight the element under the mouse
   const element = e.target;
   highlightElements([element], '#ea4335');
@@ -189,16 +194,16 @@ function handleExclusionMouseOver(e) {
 // Handle click during exclusion mode
 function handleExclusionClick(e) {
   if (!exclusionMode) return;
-  
+
   e.preventDefault();
   e.stopPropagation();
-  
+
   const element = e.target;
   const selector = generateSelector(element);
-  
+
   // Check if element is already excluded
   const existingIndex = excludedElements.findIndex(el => el.selector === selector);
-  
+
   if (existingIndex === -1) {
     // Add to excluded elements
     excludedElements.push({
@@ -206,10 +211,10 @@ function handleExclusionClick(e) {
       selector: selector,
       text: element.textContent.trim()
     });
-    
+
     // Highlight element
     highlightElements([element], '#ea4335');
-    
+
     // Send message to sidebar
     chrome.runtime.sendMessage({
       action: 'elementExcluded',
@@ -223,10 +228,10 @@ function handleExclusionClick(e) {
   } else {
     // Remove from excluded elements
     excludedElements.splice(existingIndex, 1);
-    
+
     // Remove highlight
     element.classList.remove('myscraper-exclusion-highlight');
-    
+
     // Send message to sidebar to update
     chrome.runtime.sendMessage({
       action: 'elementUnexcluded',
@@ -239,22 +244,22 @@ function handleExclusionClick(e) {
 function extractSelectedData(selectedElements, excludedElements, extractType) {
   // Get the actual elements from the DOM
   const elementsToExtract = [];
-  
+
   selectedElements.forEach(sel => {
     const element = document.querySelector(sel.selector);
     if (element) {
       elementsToExtract.push(element);
     }
   });
-  
+
   // Filter out excluded elements
   const filteredElements = elementsToExtract.filter(element => {
     const selector = generateSelector(element);
     return !excludedElements.some(ex => ex.selector === selector);
   });
-  
+
   let extractedData = [];
-  
+
   switch (extractType) {
     case 'text':
       extractedData = filteredElements.map(element => ({
@@ -262,7 +267,7 @@ function extractSelectedData(selectedElements, excludedElements, extractType) {
         selector: generateSelector(element)
       }));
       break;
-      
+
     case 'links':
       extractedData = filteredElements
         .filter(element => element.tagName === 'A')
@@ -272,7 +277,7 @@ function extractSelectedData(selectedElements, excludedElements, extractType) {
           selector: generateSelector(element)
         }));
       break;
-      
+
     case 'images':
       extractedData = filteredElements
         .filter(element => element.tagName === 'IMG')
@@ -282,11 +287,11 @@ function extractSelectedData(selectedElements, excludedElements, extractType) {
           selector: generateSelector(element)
         }));
       break;
-      
+
     case 'products':
       extractedData = filteredElements.map(element => extractProductInfo(element));
       break;
-      
+
     case 'custom':
       extractedData = filteredElements.map(element => ({
         text: element.textContent.trim(),
@@ -295,14 +300,14 @@ function extractSelectedData(selectedElements, excludedElements, extractType) {
       }));
       break;
   }
-  
+
   // Send extracted data to sidebar
   chrome.runtime.sendMessage({
     action: 'extractedData',
     data: extractedData,
     type: extractType
   });
-  
+
   showNotification(`Extracted ${extractedData.length} items`);
 }
 
@@ -317,13 +322,13 @@ function extractProductInfo(element) {
     description: '',
     selector: generateSelector(element)
   };
-  
+
   // Try to find product name
   const nameSelectors = [
     'h1', 'h2', 'h3', '.title', '.name', '.product-title',
     '[itemprop="name"]', '.product-name'
   ];
-  
+
   for (const selector of nameSelectors) {
     const nameElement = element.querySelector(selector);
     if (nameElement && nameElement.textContent.trim()) {
@@ -331,18 +336,18 @@ function extractProductInfo(element) {
       break;
     }
   }
-  
+
   // If no name found in children, use element's own text
   if (!product.name && element.textContent.trim()) {
     product.name = element.textContent.trim();
   }
-  
+
   // Try to find product price
   const priceSelectors = [
     '.price', '.cost', '.product-price', '[itemprop="price"]',
     '.current-price', '.sale-price'
   ];
-  
+
   for (const selector of priceSelectors) {
     const priceElement = element.querySelector(selector);
     if (priceElement) {
@@ -354,12 +359,12 @@ function extractProductInfo(element) {
       }
     }
   }
-  
+
   // Try to find product image
   const imageSelectors = [
     'img', '.product-image', '[itemprop="image"]', '.main-image'
   ];
-  
+
   for (const selector of imageSelectors) {
     const imageElement = element.querySelector(selector);
     if (imageElement && imageElement.src) {
@@ -367,12 +372,12 @@ function extractProductInfo(element) {
       break;
     }
   }
-  
+
   // Try to find product URL
   const linkSelectors = [
     'a', '.product-link', '[itemprop="url"]'
   ];
-  
+
   for (const selector of linkSelectors) {
     const linkElement = element.querySelector(selector);
     if (linkElement && linkElement.href) {
@@ -380,13 +385,13 @@ function extractProductInfo(element) {
       break;
     }
   }
-  
+
   // Try to find product description
   const descSelectors = [
     '.description', '.desc', '[itemprop="description"]',
     '.product-description', '.details'
   ];
-  
+
   for (const selector of descSelectors) {
     const descElement = element.querySelector(selector);
     if (descElement && descElement.textContent.trim()) {
@@ -394,7 +399,7 @@ function extractProductInfo(element) {
       break;
     }
   }
-  
+
   return product;
 }
 
@@ -417,15 +422,15 @@ function closeSidebar() {
   // Stop all modes
   stopSelectionMode();
   stopExclusionMode();
-  
+
   // Clear all highlights
   clearHighlights();
   clearExclusionHighlights();
-  
+
   // Clear selections
   selectedElements = [];
   excludedElements = [];
-  
+
   showNotification('Sidebar closed');
 }
 
@@ -451,12 +456,12 @@ function highlightElements(elements, color = '#4285f4') {
     `;
     document.head.appendChild(style);
   }
-  
+
   // Highlight each element
   elements.forEach(element => {
     // Remove existing highlight classes
     element.classList.remove('myscraper-selection-highlight', 'myscraper-exclusion-highlight');
-    
+
     // Add appropriate highlight class
     if (color === '#4285f4') {
       element.classList.add('myscraper-selection-highlight');
@@ -471,21 +476,21 @@ function generateSelector(element) {
   if (element.id) {
     return '#' + element.id;
   }
-  
+
   const path = [];
   let current = element;
-  
+
   while (current && current.nodeType === Node.ELEMENT_NODE) {
     let selector = current.tagName.toLowerCase();
-    
+
     if (current.className) {
       selector += '.' + current.className.trim().split(/\s+/).join('.');
     }
-    
+
     path.unshift(selector);
     current = current.parentElement;
   }
-  
+
   return path.join(' > ');
 }
 
@@ -502,9 +507,9 @@ function showNotification(message) {
   notification.style.zIndex = '9999';
   notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
   notification.textContent = message;
-  
+
   document.body.appendChild(notification);
-  
+
   setTimeout(() => {
     notification.style.opacity = '0';
     notification.style.transition = 'opacity 0.5s';
@@ -528,19 +533,19 @@ function detectPagination() {
     '.prev-page',
     '[class*="page"] a'
   ];
-  
+
   let paginationElements = [];
-  
+
   paginationSelectors.forEach(selector => {
     const elements = document.querySelectorAll(selector);
     if (elements.length > 0) {
       paginationElements = paginationElements.concat(Array.from(elements));
     }
   });
-  
+
   // Remove duplicates
   paginationElements = [...new Set(paginationElements)];
-  
+
   return paginationElements;
 }
 
@@ -549,11 +554,11 @@ function startManualDetection() {
   // Remove existing event listeners
   document.removeEventListener('mouseover', handleManualMouseOver);
   document.removeEventListener('click', handleManualMouseClick);
-  
+
   // Add new event listeners
   document.addEventListener('mouseover', handleManualMouseOver);
   document.addEventListener('click', handleManualMouseClick);
-  
+
   // Show notification
   showNotification('Hover over an element and click to select it');
 }
@@ -563,7 +568,7 @@ function handleManualMouseOver(e) {
   // Highlight the element under the mouse
   const element = e.target;
   highlightElements([element], '#ff5722');
-  
+
   // Show tooltip with selector
   showSelectorTooltip(element);
 }
@@ -572,33 +577,33 @@ function handleManualMouseOver(e) {
 function handleManualMouseClick(e) {
   e.preventDefault();
   e.stopPropagation();
-  
+
   const element = e.target;
   const selector = generateSelector(element);
-  
+
   // Remove event listeners
   document.removeEventListener('mouseover', handleManualMouseOver);
   document.removeEventListener('click', handleManualMouseClick);
-  
+
   // Remove tooltip
   removeSelectorTooltip();
-  
+
   // Send selector back to popup
   chrome.runtime.sendMessage({
     action: 'manualDetectionResult',
     selector: selector
   });
-  
+
   // Keep element highlighted
   highlightElements([element], '#4caf50');
-  
+
   showNotification(`Selected element with selector: ${selector}`);
 }
 
 // Show tooltip with element selector
 function showSelectorTooltip(element) {
   removeSelectorTooltip();
-  
+
   const tooltip = document.createElement('div');
   tooltip.id = 'myscraper-tooltip';
   tooltip.style.position = 'fixed';
@@ -612,10 +617,10 @@ function showSelectorTooltip(element) {
   tooltip.style.maxWidth = '300px';
   tooltip.style.wordBreak = 'break-all';
   tooltip.style.fontSize = '12px';
-  
+
   const selector = generateSelector(element);
   tooltip.textContent = selector;
-  
+
   document.body.appendChild(tooltip);
 }
 
@@ -642,12 +647,12 @@ function detectDataTypes() {
     reviews: { count: 0, elements: [] },
     pagination: []
   };
-  
+
   // Detect emails
   const emailRegex = /[\w\.-]+@[\w\.-]+\.\w+/g;
   const emails = document.body.innerText.match(emailRegex);
   result.emails.count = emails ? emails.length : 0;
-  
+
   // Detect phones
   const phoneRegexes = [
     /\+\d{1,3}\s?\(\d{3}\)\s?\d{3}[-\s]?\d{4}/g,
@@ -661,7 +666,7 @@ function detectDataTypes() {
     phones.push(...matches);
   });
   result.phones.count = [...new Set(phones)].length;
-  
+
   // Detect business data
   const businessSelectors = [
     '.business', '.company', '.organization', '.local-business',
@@ -674,7 +679,7 @@ function detectDataTypes() {
       result.business.elements = result.business.elements.concat(Array.from(elements));
     }
   });
-  
+
   // Detect product data
   const productSelectors = [
     '[data-component-type="s-search-result"]',
@@ -691,22 +696,22 @@ function detectDataTypes() {
       result.products.elements = result.products.elements.concat(Array.from(elements));
     }
   });
-  
+
   // Detect images
   const imageElements = document.querySelectorAll('img');
   result.images.count = imageElements.length;
   result.images.elements = Array.from(imageElements);
-  
+
   // Detect links
   const linkElements = document.querySelectorAll('a[href]');
   result.links.count = linkElements.length;
   result.links.elements = Array.from(linkElements);
-  
+
   // Detect lists and tables
   const listElements = document.querySelectorAll('ul, ol, table');
   result.lists.count = listElements.length;
   result.lists.elements = Array.from(listElements);
-  
+
   // Detect job postings
   const jobSelectors = [
     '.job', '.job-posting', '.career', '.position',
@@ -719,7 +724,7 @@ function detectDataTypes() {
       result.jobs.elements = result.jobs.elements.concat(Array.from(elements));
     }
   });
-  
+
   // Detect social media profiles
   const socialSelectors = [
     'a[href*="facebook.com"]',
@@ -737,7 +742,7 @@ function detectDataTypes() {
       result.social.elements = result.social.elements.concat(Array.from(elements));
     }
   });
-  
+
   // Detect reviews and comments
   const reviewSelectors = [
     '.review', '.comment', '.testimonial',
@@ -750,10 +755,10 @@ function detectDataTypes() {
       result.reviews.elements = result.reviews.elements.concat(Array.from(elements));
     }
   });
-  
+
   // Detect pagination
   result.pagination = detectPagination();
-  
+
   return result;
 }
 
@@ -765,14 +770,14 @@ function autoExtractAll() {
   extractImages();
   extractLinks();
   extractList();
-  
+
   // Extract custom data types
   extractCustomData('business');
   extractCustomData('products');
   extractCustomData('jobs');
   extractCustomData('social');
   extractCustomData('reviews');
-  
+
   showNotification('Auto-extracting all detected data types...');
 }
 
@@ -780,18 +785,18 @@ function autoExtractAll() {
 function storeData(key, data) {
   chrome.storage.local.get(['scrapedData'], (result) => {
     const scrapedData = result.scrapedData || {};
-    
+
     if (!scrapedData[key]) {
       scrapedData[key] = [];
     }
-    
+
     // Add new data and remove duplicates
     if (Array.isArray(data)) {
       scrapedData[key] = [...new Set([...scrapedData[key], ...data])];
     } else {
       scrapedData[key] = [...new Set([...scrapedData[key], data])];
     }
-    
+
     chrome.storage.local.set({ scrapedData }, () => {
       // Notify background that data was updated
       chrome.runtime.sendMessage({ action: 'dataUpdated' });
@@ -802,12 +807,12 @@ function storeData(key, data) {
 // Extract lists and tables
 function extractList() {
   const lists = [];
-  
+
   // Extract tables
   document.querySelectorAll('table').forEach(table => {
     const headers = Array.from(table.querySelectorAll('thead th, tr:first-child td')).map(th => th.innerText.trim());
     const rows = Array.from(table.querySelectorAll('tbody tr, tr:not(:first-child)'));
-    
+
     rows.forEach(row => {
       const cells = Array.from(row.querySelectorAll('td'));
       if (cells.length > 0) {
@@ -819,7 +824,7 @@ function extractList() {
       }
     });
   });
-  
+
   // Extract lists (ul, ol)
   document.querySelectorAll('ul, ol').forEach(list => {
     const items = Array.from(list.querySelectorAll('li')).map(li => li.innerText.trim());
@@ -827,7 +832,7 @@ function extractList() {
       lists.push({ items: items });
     }
   });
-  
+
   storeData('lists', lists);
   showNotification(`Extracted ${lists.length} lists/tables`);
 }
@@ -837,7 +842,7 @@ function extractEmails() {
   const emailRegex = /[\w\.-]+@[\w\.-]+\.\w+/g;
   const text = document.body.innerText;
   const emails = text.match(emailRegex) || [];
-  
+
   storeData('emails', emails);
   showNotification(`Extracted ${emails.length} email addresses`);
 }
@@ -851,18 +856,18 @@ function extractPhones() {
     /\d{3}[-\s]?\d{3}[-\s]?\d{4}/g,               // 123-456-7890
     /\+\d{1,3}\s?\d{3}[-\s]?\d{3}[-\s]?\d{4}/g    // +1 123-456-7890
   ];
-  
+
   const text = document.body.innerText;
   const phones = [];
-  
+
   phoneRegexes.forEach(regex => {
     const matches = text.match(regex) || [];
     phones.push(...matches);
   });
-  
+
   // Remove duplicates
   const uniquePhones = [...new Set(phones)];
-  
+
   storeData('phones', uniquePhones);
   showNotification(`Extracted ${uniquePhones.length} phone numbers`);
 }
@@ -875,7 +880,7 @@ function extractImages() {
     width: img.naturalWidth,
     height: img.naturalHeight
   }));
-  
+
   storeData('images', images);
   showNotification(`Extracted ${images.length} images`);
 }
@@ -887,7 +892,7 @@ function extractLinks() {
     text: link.innerText.trim(),
     title: link.title || ''
   }));
-  
+
   storeData('links', links);
   showNotification(`Extracted ${links.length} links`);
 }
@@ -895,7 +900,7 @@ function extractLinks() {
 // Extract custom data based on type
 function extractCustomData(type) {
   let data = [];
-  
+
   switch (type) {
     case 'business':
       data = extractBusinessData();
@@ -913,7 +918,7 @@ function extractCustomData(type) {
       data = extractProductData();
       break;
   }
-  
+
   storeData(type, data);
   showNotification(`Extracted ${data.length} ${type} entries`);
 }
@@ -921,13 +926,13 @@ function extractCustomData(type) {
 // Extract business details
 function extractBusinessData() {
   const businesses = [];
-  
+
   // Common business selectors
   const businessSelectors = [
     '.business', '.company', '.organization', '.local-business',
     '[itemtype*="Business"]', '[itemtype*="Organization"]'
   ];
-  
+
   businessSelectors.forEach(selector => {
     document.querySelectorAll(selector).forEach(el => {
       const business = {
@@ -937,26 +942,26 @@ function extractBusinessData() {
         website: el.querySelector('.website, a[href^="http"]')?.href || '',
         email: el.querySelector('.email, [itemprop="email"]')?.innerText.trim() || ''
       };
-      
+
       if (business.name || business.address) {
         businesses.push(business);
       }
     });
   });
-  
+
   return businesses;
 }
 
 // Extract job postings
 function extractJobData() {
   const jobs = [];
-  
+
   // Common job selectors
   const jobSelectors = [
     '.job', '.job-posting', '.career', '.position',
     '[itemtype*="JobPosting"]'
   ];
-  
+
   jobSelectors.forEach(selector => {
     document.querySelectorAll(selector).forEach(el => {
       const job = {
@@ -966,20 +971,20 @@ function extractJobData() {
         description: el.querySelector('.description, [itemprop="description"]')?.innerText.trim() || '',
         datePosted: el.querySelector('.date, [itemprop="datePosted"]')?.innerText.trim() || ''
       };
-      
+
       if (job.title) {
         jobs.push(job);
       }
     });
   });
-  
+
   return jobs;
 }
 
 // Extract social media profiles
 function extractSocialData() {
   const socialProfiles = [];
-  
+
   // Common social media selectors
   const socialSelectors = [
     'a[href*="facebook.com"]',
@@ -990,7 +995,7 @@ function extractSocialData() {
     'a[href*="pinterest.com"]',
     'a[href*="tiktok.com"]'
   ];
-  
+
   socialSelectors.forEach(selector => {
     document.querySelectorAll(selector).forEach(el => {
       const profile = {
@@ -999,24 +1004,24 @@ function extractSocialData() {
         username: getUsernameFromUrl(el.href),
         text: el.innerText.trim()
       };
-      
+
       socialProfiles.push(profile);
     });
   });
-  
+
   return socialProfiles;
 }
 
 // Extract reviews and comments
 function extractReviewData() {
   const reviews = [];
-  
+
   // Common review selectors
   const reviewSelectors = [
     '.review', '.comment', '.testimonial',
     '[itemtype*="Review"]', '[itemtype*="Comment"]'
   ];
-  
+
   reviewSelectors.forEach(selector => {
     document.querySelectorAll(selector).forEach(el => {
       const review = {
@@ -1026,20 +1031,20 @@ function extractReviewData() {
         content: el.querySelector('.content, .text, [itemprop="reviewBody"]')?.innerText.trim() || '',
         url: window.location.href
       };
-      
+
       if (review.content) {
         reviews.push(review);
       }
     });
   });
-  
+
   return reviews;
 }
 
 // Extract product details from e-commerce sites
 function extractProductData() {
   const products = [];
-  
+
   // Common product selectors for different e-commerce sites
   const productSelectors = [
     // Amazon
@@ -1047,12 +1052,12 @@ function extractProductData() {
     '#dp-container',
     '#productDetails',
     '#productDescription',
-    
+
     // eBay
     '.s-item',
     '.x-item-title',
     '.u-flL',
-    
+
     // General e-commerce
     '.product',
     '.product-card',
@@ -1061,14 +1066,14 @@ function extractProductData() {
     '[data-testid="product-card"]',
     '.product-tile',
     '.product-wrapper',
-    
+
     // Schema.org markup
     '[itemtype*="Product"]'
   ];
-  
+
   // Try to find product containers
   let productContainers = [];
-  
+
   productSelectors.forEach(selector => {
     const elements = document.querySelectorAll(selector);
     if (elements.length > 0) {
@@ -1076,14 +1081,14 @@ function extractProductData() {
       return; // Stop after finding the first selector with results
     }
   });
-  
+
   // If no specific containers found, try to find products by common patterns
   if (productContainers.length === 0) {
     // Look for elements with product-related IDs or classes
     const allElements = document.querySelectorAll('*[id*="product"], *[class*="product"]');
     productContainers = Array.from(allElements);
   }
-  
+
   // Extract data from each product container
   productContainers.forEach(container => {
     const product = {
@@ -1097,13 +1102,13 @@ function extractProductData() {
       brand: extractProductBrand(container),
       specifications: extractProductSpecifications(container)
     };
-    
+
     // Only add if we have at least a name or price
     if (product.name || product.price) {
       products.push(product);
     }
   });
-  
+
   // If we didn't find any products in containers, try to extract from the whole page
   if (products.length === 0) {
     const product = {
@@ -1117,12 +1122,12 @@ function extractProductData() {
       brand: extractProductBrand(document),
       specifications: extractProductSpecifications(document)
     };
-    
+
     if (product.name || product.price) {
       products.push(product);
     }
   }
-  
+
   return products;
 }
 
@@ -1139,14 +1144,14 @@ function extractProductName(container) {
     '.product__title',
     '#productTitle'
   ];
-  
+
   for (const selector of nameSelectors) {
     const element = container.querySelector(selector);
     if (element && element.innerText.trim()) {
       return element.innerText.trim();
     }
   }
-  
+
   // Look for elements with title in their ID or class
   const titleElements = container.querySelectorAll('*[id*="title"], *[class*="title"]');
   for (const element of titleElements) {
@@ -1154,7 +1159,7 @@ function extractProductName(container) {
       return element.innerText.trim();
     }
   }
-  
+
   return '';
 }
 
@@ -1174,7 +1179,7 @@ function extractProductPrice(container) {
     '#priceblock_dealprice',
     '#priceblock_ourprice'
   ];
-  
+
   for (const selector of priceSelectors) {
     const element = container.querySelector(selector);
     if (element) {
@@ -1186,7 +1191,7 @@ function extractProductPrice(container) {
       }
     }
   }
-  
+
   // Look for price patterns in the text
   const text = container.innerText;
   const pricePatterns = [
@@ -1196,14 +1201,14 @@ function extractProductPrice(container) {
     /[\d,.]+\s*£/g,
     /price:\s*[\d,.]+/gi
   ];
-  
+
   for (const pattern of pricePatterns) {
     const match = text.match(pattern);
     if (match) {
       return match[0].replace(/[^\d,.]/g, '');
     }
   }
-  
+
   return '';
 }
 
@@ -1219,26 +1224,26 @@ function extractProductImage(container) {
     '.product__image',
     'img[src*="product"]'
   ];
-  
+
   for (const selector of imageSelectors) {
     const element = container.querySelector(selector);
     if (element && element.src) {
       return element.src;
     }
   }
-  
+
   // Look for the largest image in the container
   const images = container.querySelectorAll('img');
   let largestImage = null;
   let largestSize = 0;
-  
+
   images.forEach(img => {
     if (img.src && img.naturalWidth * img.naturalHeight > largestSize) {
       largestSize = img.naturalWidth * img.naturalHeight;
       largestImage = img;
     }
   });
-  
+
   return largestImage ? largestImage.src : '';
 }
 
@@ -1254,14 +1259,14 @@ function extractProductDescription(container) {
     '.product__description',
     '#feature-bullets ul'
   ];
-  
+
   for (const selector of descriptionSelectors) {
     const element = container.querySelector(selector);
     if (element && element.innerText.trim()) {
       return element.innerText.trim();
     }
   }
-  
+
   // Look for elements with description in their ID or class
   const descElements = container.querySelectorAll('*[id*="description"], *[class*="description"]');
   for (const element of descElements) {
@@ -1269,7 +1274,7 @@ function extractProductDescription(container) {
       return element.innerText.trim();
     }
   }
-  
+
   return '';
 }
 
@@ -1285,7 +1290,7 @@ function extractProductRating(container) {
     '.review-count',
     '.rating__value'
   ];
-  
+
   for (const selector of ratingSelectors) {
     const element = container.querySelector(selector);
     if (element) {
@@ -1297,7 +1302,7 @@ function extractProductRating(container) {
       }
     }
   }
-  
+
   // Look for rating patterns in the text
   const text = container.innerText;
   const ratingPatterns = [
@@ -1305,14 +1310,14 @@ function extractProductRating(container) {
     /[\d.]+\s*stars?/gi,
     /[\d.]+\/\d+/g
   ];
-  
+
   for (const pattern of ratingPatterns) {
     const match = text.match(pattern);
     if (match) {
       return match[0].replace(/[^\d.]/g, '');
     }
   }
-  
+
   return '';
 }
 
@@ -1327,14 +1332,14 @@ function extractProductAvailability(container) {
     '.a-color-success',
     '.stock-status'
   ];
-  
+
   for (const selector of availabilitySelectors) {
     const element = container.querySelector(selector);
     if (element && element.innerText.trim()) {
       return element.innerText.trim();
     }
   }
-  
+
   // Look for availability keywords in the text
   const text = container.innerText.toLowerCase();
   if (text.includes('in stock') || text.includes('available')) {
@@ -1344,7 +1349,7 @@ function extractProductAvailability(container) {
   } else if (text.includes('backorder') || text.includes('pre-order')) {
     return 'Backorder';
   }
-  
+
   return '';
 }
 
@@ -1357,14 +1362,14 @@ function extractProductURL(container) {
     '.product-link',
     '.item-link'
   ];
-  
+
   for (const selector of linkSelectors) {
     const element = container.querySelector(selector);
     if (element && element.href) {
       return element.href;
     }
   }
-  
+
   // If no link found, return current page URL
   return window.location.href;
 }
@@ -1380,34 +1385,34 @@ function extractProductBrand(container) {
     '.brand-name',
     '.product__brand'
   ];
-  
+
   for (const selector of brandSelectors) {
     const element = container.querySelector(selector);
     if (element && element.innerText.trim()) {
       return element.innerText.trim();
     }
   }
-  
+
   // Look for brand patterns in the text
   const text = container.innerText;
   const brandPatterns = [
     /brand:\s*([^\n]+)/gi,
     /by\s+([^\n]+)/gi
   ];
-  
+
   for (const pattern of brandPatterns) {
     const match = text.match(pattern);
     if (match) {
       return match[0].replace(/brand:\s*|by\s+/i, '');
     }
   }
-  
+
   return '';
 }
 
 function extractProductSpecifications(container) {
   const specs = {};
-  
+
   // Try to find specification tables
   const specTables = container.querySelectorAll('table');
   specTables.forEach(table => {
@@ -1423,13 +1428,13 @@ function extractProductSpecifications(container) {
       }
     });
   });
-  
+
   // Try to find specification lists
   const specLists = container.querySelectorAll('dl, .specifications, .features');
   specLists.forEach(list => {
     const terms = list.querySelectorAll('dt, .spec-title, .feature-title');
     const definitions = list.querySelectorAll('dd, .spec-value, .feature-value');
-    
+
     terms.forEach((term, index) => {
       if (definitions[index]) {
         const key = term.innerText.trim();
@@ -1440,7 +1445,7 @@ function extractProductSpecifications(container) {
       }
     });
   });
-  
+
   return specs;
 }
 
@@ -1470,7 +1475,7 @@ function extractWithSelector(selector) {
       showNotification(`No elements found with selector: ${selector}`);
       return;
     }
-    
+
     const data = Array.from(elements).map(element => {
       return {
         text: element.innerText.trim(),
@@ -1479,7 +1484,7 @@ function extractWithSelector(selector) {
         src: element.src || null
       };
     });
-    
+
     storeData('customSelector', data);
     showNotification(`Extracted ${data.length} items with selector: ${selector}`);
   } catch (error) {
@@ -1493,7 +1498,7 @@ function openSidebar() {
   if (document.getElementById('myscraper-sidebar')) {
     return;
   }
-  
+
   // Create sidebar container
   const sidebar = document.createElement('div');
   sidebar.id = 'myscraper-sidebar';
@@ -1506,17 +1511,17 @@ function openSidebar() {
   sidebar.style.backgroundColor = 'white';
   sidebar.style.boxShadow = '-2px 0 10px rgba(0,0,0,0.1)';
   sidebar.style.fontFamily = 'Roboto, sans-serif';
-  
+
   // Create iframe for sidebar content
   const iframe = document.createElement('iframe');
   iframe.src = chrome.runtime.getURL('sidebar.html');
   iframe.style.width = '100%';
   iframe.style.height = '100%';
   iframe.style.border = 'none';
-  
+
   sidebar.appendChild(iframe);
   document.body.appendChild(sidebar);
-  
+
   // Add close button
   const closeButton = document.createElement('button');
   closeButton.innerHTML = '×';
@@ -1535,11 +1540,11 @@ function openSidebar() {
   closeButton.style.display = 'flex';
   closeButton.style.alignItems = 'center';
   closeButton.style.justifyContent = 'center';
-  
+
   closeButton.onclick = function() {
     document.body.removeChild(sidebar);
   };
-  
+
   sidebar.appendChild(closeButton);
 }
 
@@ -1551,7 +1556,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.action === 'highlightElements') {
     const { type, color } = message;
     const result = detectDataTypes();
-    
+
     if (result[type] && result[type].elements.length > 0) {
       highlightElements(result[type].elements, color);
     }
@@ -1602,7 +1607,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ success: true });
     return true;
   }
-  
+
   // For actions that don't need a response
   return false;
 });
+}
