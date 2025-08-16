@@ -16,20 +16,20 @@
       --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
       --shadow-hover: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    
+
     body {
       font-family: 'Roboto', sans-serif;
       width: 400px;
       color: var(--dark-color);
       background-color: #fff;
     }
-    
+
     .header {
       display: flex;
       align-items: center;
@@ -38,24 +38,24 @@
       color: white;
       border-radius: 8px 8px 0 0;
     }
-    
+
     .header img {
       width: 32px;
       height: 32px;
       margin-right: 10px;
     }
-    
+
     .header h1 {
       font-size: 20px;
       font-weight: 500;
     }
-    
+
     .tab-container {
       display: flex;
       background-color: var(--light-color);
       border-bottom: 1px solid var(--border-color);
     }
-    
+
     .tab {
       flex: 1;
       padding: 12px 0;
@@ -67,34 +67,34 @@
       transition: all 0.2s ease;
       border-bottom: 3px solid transparent;
     }
-    
+
     .tab:hover {
       background-color: rgba(66, 133, 244, 0.1);
     }
-    
+
     .tab.active {
       color: var(--primary-color);
       border-bottom: 3px solid var(--primary-color);
     }
-    
+
     .tab i {
       margin-right: 5px;
     }
-    
+
     .content {
       padding: 15px;
       height: 400px;
       overflow-y: auto;
     }
-    
+
     .tab-content {
       display: none;
     }
-    
+
     .tab-content.active {
       display: block;
     }
-    
+
     .card {
       background-color: white;
       border-radius: 8px;
@@ -103,11 +103,11 @@
       box-shadow: var(--shadow);
       transition: all 0.3s ease;
     }
-    
+
     .card:hover {
       box-shadow: var(--shadow-hover);
     }
-    
+
     .card-title {
       font-size: 16px;
       font-weight: 500;
@@ -116,12 +116,12 @@
       display: flex;
       align-items: center;
     }
-    
+
     .card-title i {
       margin-right: 8px;
       color: var(--primary-color);
     }
-    
+
     .btn {
       width: 100%;
       padding: 10px;
@@ -137,62 +137,62 @@
       align-items: center;
       justify-content: center;
     }
-    
+
     .btn i {
       margin-right: 8px;
     }
-    
+
     .btn:hover {
       background-color: #3367d6;
     }
-    
+
     .btn-secondary {
       background-color: var(--light-color);
       color: var(--dark-color);
       border: 1px solid var(--border-color);
     }
-    
+
     .btn-secondary:hover {
       background-color: #e8eaed;
     }
-    
+
     .btn-success {
       background-color: var(--secondary-color);
     }
-    
+
     .btn-success:hover {
       background-color: #2d9249;
     }
-    
+
     .btn-danger {
       background-color: var(--danger-color);
     }
-    
+
     .btn-danger:hover {
       background-color: #d33b27;
     }
-    
+
     .btn-group {
       display: flex;
       gap: 10px;
       margin-bottom: 10px;
     }
-    
+
     .btn-group .btn {
       margin-bottom: 0;
     }
-    
+
     .form-group {
       margin-bottom: 15px;
     }
-    
+
     .form-group label {
       display: block;
       margin-bottom: 5px;
       font-weight: 500;
       font-size: 14px;
     }
-    
+
     .form-control {
       width: 100%;
       padding: 10px;
@@ -201,24 +201,24 @@
       font-size: 14px;
       transition: border-color 0.2s ease;
     }
-    
+
     .form-control:focus {
       outline: none;
       border-color: var(--primary-color);
     }
-    
+
     textarea.form-control {
       min-height: 80px;
       resize: vertical;
     }
-    
+
     .data-types {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 15px;
     }
-    
+
     .data-type {
       background-color: var(--light-color);
       color: var(--dark-color);
@@ -229,12 +229,12 @@
       align-items: center;
       border: 1px solid var(--border-color);
     }
-    
+
     .data-type i {
       margin-right: 6px;
       color: var(--primary-color);
     }
-    
+
     .data-type .count {
       background-color: var(--primary-color);
       color: white;
@@ -243,14 +243,14 @@
       margin-left: 6px;
       font-size: 11px;
     }
-    
+
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 10px;
       margin-bottom: 15px;
     }
-    
+
     .stat-card {
       background-color: var(--light-color);
       border-radius: 8px;
@@ -258,19 +258,19 @@
       text-align: center;
       border: 1px solid var(--border-color);
     }
-    
+
     .stat-value {
       font-size: 24px;
       font-weight: 700;
       color: var(--primary-color);
     }
-    
+
     .stat-label {
       font-size: 12px;
       color: var(--dark-color);
       margin-top: 5px;
     }
-    
+
     .loading {
       display: inline-block;
       width: 16px;
@@ -281,12 +281,12 @@
       animation: spin 1s linear infinite;
       margin-right: 8px;
     }
-    
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    
+
     .status {
       padding: 10px;
       margin-top: 15px;
@@ -295,19 +295,19 @@
       font-size: 14px;
       display: none;
     }
-    
+
     .status.success {
       background-color: rgba(52, 168, 83, 0.1);
       color: var(--secondary-color);
       border: 1px solid rgba(52, 168, 83, 0.3);
     }
-    
+
     .status.error {
       background-color: rgba(234, 67, 53, 0.1);
       color: var(--danger-color);
       border: 1px solid rgba(234, 67, 53, 0.3);
     }
-    
+
     .footer {
       display: flex;
       justify-content: space-between;
@@ -316,19 +316,19 @@
       border-top: 1px solid var(--border-color);
       font-size: 12px;
     }
-    
+
     .footer a {
       color: var(--primary-color);
       text-decoration: none;
     }
-    
+
     .highlight-buttons {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 15px;
     }
-    
+
     .btn-highlight {
       padding: 6px 10px;
       font-size: 12px;
@@ -341,30 +341,30 @@
       display: flex;
       align-items: center;
     }
-    
+
     .btn-highlight i {
       margin-right: 5px;
     }
-    
+
     .btn-highlight:hover {
       background-color: #e8eaed;
     }
-    
+
     .radio-group {
       margin-bottom: 15px;
     }
-    
+
     .radio-group label {
       display: flex;
       align-items: center;
       margin-bottom: 8px;
       cursor: pointer;
     }
-    
+
     .radio-group input[type="radio"] {
       margin-right: 8px;
     }
-    
+
     .pagination-options {
       margin-top: 10px;
       padding: 10px;
@@ -372,7 +372,7 @@
       border-radius: 4px;
       display: none;
     }
-    
+
     .manual-detection-result {
       margin-top: 15px;
       padding: 10px;
@@ -380,7 +380,7 @@
       border-radius: 4px;
       display: none;
     }
-    
+
     .progress-bar {
       height: 4px;
       background-color: var(--border-color);
@@ -388,12 +388,28 @@
       margin-top: 10px;
       overflow: hidden;
     }
-    
+
     .progress {
       height: 100%;
       background-color: var(--primary-color);
       width: 0;
       transition: width 0.3s ease;
+    }
+    
+    #data-preview-container table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    #data-preview-container th, #data-preview-container td {
+      border: 1px solid var(--border-color);
+      padding: 6px;
+      text-align: left;
+      word-break: break-all;
+    }
+    #data-preview-container th {
+      background-color: var(--light-color);
+      font-weight: 500;
     }
   </style>
 </head>
@@ -402,7 +418,7 @@
     <img src="icons/icon48.png" alt="MyScraper">
     <h1>MyScraper</h1>
   </div>
-  
+
   <div class="tab-container">
     <div class="tab active" data-tab="home">
       <i class="fas fa-home"></i> Home
@@ -417,7 +433,7 @@
       <i class="fas fa-download"></i> Export
     </div>
   </div>
-  
+
   <div class="content">
     <!-- Home Tab -->
     <div class="tab-content active" id="home-tab">
@@ -444,7 +460,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="card">
         <div class="card-title">
           <i class="fas fa-magic"></i> Auto-Detection
@@ -457,7 +473,7 @@
           <i class="fas fa-download"></i> Extract All Detected Data
         </button>
       </div>
-      
+
       <div class="card">
         <div class="card-title">
           <i class="fas fa-bolt"></i> Quick Actions
@@ -476,7 +492,7 @@
         </button>
       </div>
     </div>
-    
+
     <!-- Extract Tab -->
     <div class="tab-content" id="extract-tab">
       <div class="card">
@@ -506,7 +522,7 @@
           </button>
         </div>
       </div>
-      
+
       <div class="card">
         <div class="card-title">
           <i class="fas fa-mouse-pointer"></i> Manual Selection
@@ -518,7 +534,7 @@
           Open a sidebar to manually select elements for extraction. This gives you precise control over what data to extract.
         </p>
       </div>
-      
+
       <div class="card">
         <div class="card-title">
           <i class="fas fa-highlighter"></i> Highlight Detected Elements
@@ -550,7 +566,7 @@
           <i class="fas fa-eraser"></i> Clear Highlights
         </button>
       </div>
-      
+
       <div class="card">
         <div class="card-title">
           <i class="fas fa-mouse-pointer"></i> Manual Detection
@@ -569,7 +585,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Bulk Tab -->
     <div class="tab-content" id="bulk-tab">
       <div class="card">
@@ -580,7 +596,7 @@
           <label for="bulkUrls">Enter URLs (one per line):</label>
           <textarea id="bulkUrls" class="form-control" placeholder="https://example.com/page1&#10;https://example.com/page2"></textarea>
         </div>
-        
+
         <div class="form-group">
           <label for="bulkDataType">Data Type:</label>
           <select id="bulkDataType" class="form-control">
@@ -592,7 +608,7 @@
             <option value="reviews">Reviews Only</option>
           </select>
         </div>
-        
+
         <div class="radio-group">
           <label>
             <input type="radio" name="scrapingMode" value="single" checked>
@@ -603,24 +619,24 @@
             Multi-Page with Pagination
           </label>
         </div>
-        
+
         <div id="paginationOptions" class="pagination-options">
           <div class="form-group">
             <label for="paginationPages">Number of pages:</label>
             <input type="number" id="paginationPages" class="form-control" min="1" max="50" value="5">
           </div>
         </div>
-        
+
         <button id="bulkScrape" class="btn btn-success">
           <i class="fas fa-play"></i> Start Bulk Scraping
         </button>
-        
+
         <div class="progress-bar">
           <div id="bulkProgress" class="progress"></div>
         </div>
       </div>
     </div>
-    
+
     <!-- Export Tab -->
     <div class="tab-content" id="export-tab">
       <div class="card">
@@ -635,12 +651,24 @@
             <option value="json">JSON (JavaScript Object Notation)</option>
           </select>
         </div>
-        
+
         <button id="exportData" class="btn">
           <i class="fas fa-file-export"></i> Export Extracted Data
         </button>
       </div>
-      
+
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-eye"></i> Data Preview
+        </div>
+        <div id="data-preview-container" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px;">
+          <p style="padding: 10px; color: #666;">No data to preview yet.</p>
+        </div>
+        <button id="extractToPageBtn" class="btn btn-secondary" style="margin-top: 15px;">
+          <i class="fas fa-external-link-alt"></i> View Full Data
+        </button>
+      </div>
+
       <div class="card">
         <div class="card-title">
           <i class="fas fa-chart-pie"></i> Data Summary
@@ -666,9 +694,9 @@
       </div>
     </div>
   </div>
-  
+
   <div id="status" class="status"></div>
-  
+
   <div class="footer">
     <a href="#" id="optionsLink">
       <i class="fas fa-cog"></i> Settings
@@ -677,7 +705,7 @@
       <i class="fas fa-question-circle"></i> Help
     </a>
   </div>
-  
+
   <script src="popup.js"></script>
 </body>
 </html>
