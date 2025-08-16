@@ -330,6 +330,8 @@ document.addEventListener('DOMContentLoaded', function() {
   chrome.runtime.onMessage.addListener((message) => {
     if (message.action === 'dataUpdated') {
       updateDataSummary();
+      updateExportDataSummary();
+      renderDataPreviewTable();
     } else if (message.action === 'bulkProgress') {
       updateBulkProgress(message.completed, message.total);
     } else if (message.action === 'bulkComplete') {
@@ -351,9 +353,249 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   });
-});
 
-function renderDataPreviewTable() {
+  function renderDataPreviewTable() {
+    if (!elements.dataPreviewContainer) return;
+  
+    chrome.storage.local.get(['scrapedData'], (result) => {
+      const data = result.scrapedData || {};
+      const allItems = [];
+  
+      // Combine all data into a single array for preview
+      for (const type in data) {
+        if (Array.isArray(data[type])) {
+          data[type].forEach(item => {
+            allItems.push({ type, item });
+          });
+        }
+      }
+  
+      if (allItems.length === 0) {
+        elements.dataPreviewContainer.innerHTML = '<p style="padding: 10px; color: #666;">No data to preview yet.</p>';
+        return;
+      }
+  
+      // Take a slice for the preview
+      const previewItems = allItems.slice(0, 10);
+  
+      let tableHTML = '<table><thead><tr><th>Type</th><th>Data</th></tr></thead><tbody>';
+  
+      previewItems.forEach(({ type, item }) => {
+        let displayValue;
+        if (typeof item === 'object' && item !== null) {
+          // For objects, show a summary. e.g., keys or stringify
+          displayValue = Object.entries(item).map(([key, value]) => `<b>${key}:</b> ${value}`).join('<br>');
+        } else {
+          displayValue = item;
+        }
+        tableHTML += `<tr><td>${type}</td><td>${displayValue}</td></tr>`;
+      });
+  
+      tableHTML += '</tbody></table>';
+  
+      elements.dataPreviewContainer.innerHTML = tableHTML;
+    });
+  }
+  
+  // Run auto-detection on the current page
+  function runAutoDetection() {
+    const detectStatus = document.getElementById('autoDetectStatus');
+    const dataTypes = document.getElementById('dataTypes');
+    const autoExtract = document.getElementById('autoExtract');
+  
+    // Check if elements exist
+    if (!detectStatus || !dataTypes || !autoExtract) {
+      console.error('Auto-detection elements not found');
+      return;
+    }
+  
+    // Reset UI
+    detectStatus.style.display = 'flex';
+    dataTypes.innerHTML = '';
+    autoExtract.style.display = 'none';
+  
+    // Execute detection script
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+      if (tabs && tabs[0]) {
+        // Send message to content script to run detection
+        chrome.tabs.sendMessage(tabs[0].id, {action: 'autoDetect'}, (response) => {
+          if (response && response.result) {
+            displayAutoDetectionResult(response.result);
+            } else {
+            // Fallback: try to inject and run the detection function
+            chrome.scripting.executeScript({
+              target: {tabId: tabs[0].id},
+              files: ['content.js']
+            }, () => {
+              // Now that content.js is injected, send the message
+              setTimeout(() => {
+                chrome.tabs.sendMessage(tabs[0].id, {action: 'autoDetect'}, (response) => {
+                  if (response && response.result) {
+                    displayAutoDetectionResult(response.result);
+                  }
+                });
+              }, 100);
+            });
+          }
+        });
+      }
+    });
+  }
+  
+  // Display auto-detection results
+  function displayAutoDetectionResult(data) {
+    const detectStatus = document.getElementById('autoDetectStatus');
+    const dataTypes = document.getElementById('dataTypes');
+    const autoExtract = document.getElementById('autoExtract');
+  
+    // Check if elements exist
+    if (!detectStatus || !dataTypes || !autoExtract) {
+      console.error('Auto-detection display elements not found');
+      return;
+    }
+  
+    // Hide loading indicator
+    detectStatus.style.display = 'none';
+  
+    // Display detected data types
+    let hasData = false;
+  
+    if (data.emails && data.emails.count > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-envelope"></i> Emails <span class="count">${data.emails.count}</span></div>`;
+      hasData = true;
+    }
+  
+    if (data.phones && data.phones.count > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-phone"></i> Phones <span class="count">${data.phones.count}</span></div>`;
+      hasData = true;
+    }
+  
+    if (data.business && data.business.count > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-building"></i> Businesses <span class="count">${data.business.count}</span></div>`;
+      hasData = true;
+    }
+  
+    if (data.products && data.products.count > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-shopping-cart"></i> Products <span class="count">${data.products.count}</span></div>`;
+      hasData = true;
+    }
+  
+    if (data.images && data.images.count > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-image"></i> Images <span class="count">${data.images.count}</span></div>`;
+      hasData = true;
+    }
+  
+    if (data.links && data.links.count > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-link"></i> Links <span class="count">${data.links.count}</span></div>`;
+      hasData = true;
+    }
+  
+    if (data.lists && data.lists.count > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-list"></i> Lists/Tables <span class="count">${data.lists.count}</span></div>`;
+      hasData = true;
+    }
+  
+    if (data.jobs && data.jobs.count > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-briefcase"></i> Jobs <span class="count">${data.jobs.count}</span></div>`;
+      hasData = true;
+    }
+  
+    if (data.social && data.social.count > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-share-alt"></i> Social Media <span class="count">${data.social.count}</span></div>`;
+      hasData = true;
+    }
+  
+    if (data.reviews && data.reviews.count > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-star"></i> Reviews <span class="count">${data.reviews.count}</span></div>`;
+      hasData = true;
+    }
+  
+    if (data.pagination && data.pagination.length > 0) {
+      dataTypes.innerHTML += `<div class="data-type"><i class="fas fa-forward"></i> Pagination <span class="count">${data.pagination.length}</span></div>`;
+      hasData = true;
+    }
+  
+    // Show auto-extract button if data was detected
+    if (hasData) {
+      autoExtract.style.display = 'block';
+    } else {
+      dataTypes.innerHTML = '<div class="data-type"><i class="fas fa-info-circle"></i> No data detected</div>';
+    }
+  }
+  
+  function executeContentScript(action, params = {}) {
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+      if (tabs && tabs[0]) {
+        chrome.scripting.executeScript({
+          target: {tabId: tabs[0].id},
+          function: executeContentScriptFunction,
+          args: [action, params]
+        });
+      } else {
+        showStatus('No active tab found', 'error');
+      }
+    });
+  }
+  
+  function executeContentScriptFunction(action, params) {
+    window.postMessage({
+      type: 'myscraper_action',
+      action: action,
+      params: params
+    }, '*');
+  }
+  
+  function showStatus(message, type) {
+    const statusEl = document.getElementById('status');
+    if (statusEl) {
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+      statusEl.style.display = 'block';
+  
+      setTimeout(() => {
+        statusEl.style.display = 'none';
+      }, 3000);
+    }
+  }
+  
+  function updateDataSummary() {
+    chrome.storage.local.get(['scrapedData'], (result) => {
+      const data = result.scrapedData || {};
+      const emailCount = document.getElementById('emailCount');
+      const phoneCount = document.getElementById('phoneCount');
+      const businessCount = document.getElementById('businessCount');
+      const productCount = document.getElementById('productCount');
+  
+      if (emailCount) emailCount.textContent = data.emails?.length || 0;
+      if (phoneCount) phoneCount.textContent = data.phones?.length || 0;
+      if (businessCount) businessCount.textContent = data.business?.length || 0;
+      if (productCount) productCount.textContent = data.products?.length || 0;
+    });
+  }
+  
+  function updateExportDataSummary() {
+    chrome.storage.local.get(['scrapedData'], (result) => {
+      const data = result.scrapedData || {};
+      const exportEmailCount = document.getElementById('exportEmailCount');
+      const exportPhoneCount = document.getElementById('exportPhoneCount');
+      const exportBusinessCount = document.getElementById('exportBusinessCount');
+      const exportProductCount = document.getElementById('exportProductCount');
+  
+      if (exportEmailCount) exportEmailCount.textContent = data.emails?.length || 0;
+      if (exportPhoneCount) exportPhoneCount.textContent = data.phones?.length || 0;
+      if (exportBusinessCount) exportBusinessCount.textContent = data.business?.length || 0;
+      if (exportProductCount) exportProductCount.textContent = data.products?.length || 0;
+    });
+  }
+  
+  function updateBulkProgress(completed, total) {
+    const bulkProgress = document.getElementById('bulkProgress');
+    if (bulkProgress) {
+      const percentage = Math.round((completed / total) * 100);
+      bulkProgress.style.width = `${percentage}%`;
+    }
+  }
+});
   if (!elements.dataPreviewContainer) return;
 
   chrome.storage.local.get(['scrapedData'], (result) => {
