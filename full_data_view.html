@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Full Data View - MyScraper</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    h1 {
+      color: #202124;
+    }
+    #full-data-container {
+      background-color: white;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #dadce0;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f1f3f4;
+      font-weight: 500;
+    }
+    tbody tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Full Scraped Data</h1>
+  <div id="full-data-container">
+    <p>Loading data...</p>
+  </div>
+  <script src="full_data_view.js"></script>
+</body>
+</html>
