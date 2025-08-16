@@ -18,16 +18,16 @@ document.addEventListener('DOMContentLoaded', function() {
     step2: document.getElementById('step2'),
     step3: document.getElementById('step3')
   };
-  
+
   // State variables
   let selectionMode = false;
   let exclusionMode = false;
   let selectedElements = [];
   let excludedElements = [];
-  
+
   // Initialize
   init();
-  
+
   function init() {
     // Set up event listeners
     elements.startSelection.addEventListener('click', toggleSelectionMode);
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
     elements.extractData.addEventListener('click', extractSelectedData);
     elements.closeSidebar.addEventListener('click', closeSidebar);
     elements.helpButton.addEventListener('click', showHelp);
-    
+
     // Get current tab and set up communication
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       if (tabs && tabs[0]) {
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  
+
   function setupMessageListener() {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.action === 'elementSelected') {
@@ -61,23 +61,23 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  
+
   function toggleSelectionMode() {
     selectionMode = !selectionMode;
-    
+
     if (selectionMode) {
       elements.selectionMode.classList.add('active');
       elements.selectionMode.innerHTML = 'Selection mode: <strong>ON</strong>';
       elements.startSelection.innerHTML = '<i class="fas fa-stop"></i> Stop Selection';
-      
+
       // Turn off exclusion mode if it's on
       if (exclusionMode) {
         toggleExclusionMode();
       }
-      
+
       // Update step status
       updateStepStatus(1, 'active');
-      
+
       // Send message to content script to start selection mode
       sendToContentScript({
         action: 'startSelectionMode'
@@ -86,30 +86,30 @@ document.addEventListener('DOMContentLoaded', function() {
       elements.selectionMode.classList.remove('active');
       elements.selectionMode.innerHTML = 'Selection mode: <strong>OFF</strong>';
       elements.startSelection.innerHTML = '<i class="fas fa-mouse-pointer"></i> Start Selection';
-      
+
       // Send message to content script to stop selection mode
       sendToContentScript({
         action: 'stopSelectionMode'
       });
     }
   }
-  
+
   function toggleExclusionMode() {
     exclusionMode = !exclusionMode;
-    
+
     if (exclusionMode) {
       elements.exclusionMode.classList.add('active');
       elements.exclusionMode.innerHTML = 'Exclusion mode: <strong>ON</strong>';
       elements.startExclusion.innerHTML = '<i class="fas fa-stop"></i> Stop Exclusion';
-      
+
       // Turn off selection mode if it's on
       if (selectionMode) {
         toggleSelectionMode();
       }
-      
+
       // Update step status
       updateStepStatus(2, 'active');
-      
+
       // Send message to content script to start exclusion mode
       sendToContentScript({
         action: 'startExclusionMode'
@@ -118,18 +118,18 @@ document.addEventListener('DOMContentLoaded', function() {
       elements.exclusionMode.classList.remove('active');
       elements.exclusionMode.innerHTML = 'Exclusion mode: <strong>OFF</strong>';
       elements.startExclusion.innerHTML = '<i class="fas fa-ban"></i> Start Exclusion';
-      
+
       // Send message to content script to stop exclusion mode
       sendToContentScript({
         action: 'stopExclusionMode'
       });
     }
   }
-  
+
   function handleElementSelected(element, selector) {
     // Check if element is already selected
     const existingIndex = selectedElements.findIndex(el => el.selector === selector);
-    
+
     if (existingIndex === -1) {
       // Add to selected elements
       selectedElements.push({
@@ -137,20 +137,20 @@ document.addEventListener('DOMContentLoaded', function() {
         text: element.text.substring(0, 50) + (element.text.length > 50 ? '...' : ''),
         type: getElementTypeName(element)
       });
-      
+
       updateSelectionList();
       showStatus(`Element selected: ${element.text.substring(0, 30)}...`, 'success');
-      
+
       // Update step status
       updateStepStatus(1, 'completed');
       updateStepStatus(2, 'active');
     }
   }
-  
+
   function handleElementExcluded(element, selector) {
     // Check if element is already excluded
     const existingIndex = excludedElements.findIndex(el => el.selector === selector);
-    
+
     if (existingIndex === -1) {
       // Add to excluded elements
       excludedElements.push({
@@ -158,15 +158,15 @@ document.addEventListener('DOMContentLoaded', function() {
         text: element.text.substring(0, 50) + (element.text.length > 50 ? '...' : ''),
         type: getElementTypeName(element)
       });
-      
+
       showStatus(`Element excluded: ${element.text.substring(0, 30)}...`, 'success');
-      
+
       // Update step status
       updateStepStatus(2, 'completed');
       updateStepStatus(3, 'active');
     }
   }
-  
+
   function getElementTypeName(element) {
     if (element.tagName === 'A') return 'Link';
     if (element.tagName === 'IMG') return 'Image';
@@ -174,17 +174,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (element.tagName === 'INPUT') return 'Input';
     if (element.tagName === 'SELECT') return 'Select';
     if (element.tagName === 'TEXTAREA') return 'Textarea';
-    if (element.classList.contains('product')) return 'Product';
-    if (element.classList.contains('item')) return 'Item';
+    if (element.className && typeof element.className === 'string' && element.className.includes('product')) return 'Product';
+    if (element.className && typeof element.className === 'string' && element.className.includes('item')) return 'Item';
     return 'Element';
   }
-  
+
   function updateSelectionList() {
     if (selectedElements.length === 0) {
       elements.selectionList.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No elements selected yet</div>';
       return;
     }
-    
+
     let html = '';
     selectedElements.forEach((element, index) => {
       html += `
@@ -198,9 +198,9 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       `;
     });
-    
+
     elements.selectionList.innerHTML = html;
-    
+
     // Add event listeners to remove buttons
     document.querySelectorAll('.selection-item-remove').forEach(btn => {
       btn.addEventListener('click', function() {
@@ -210,36 +210,36 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
-  
+
   function clearSelectedElements() {
     selectedElements = [];
     updateSelectionList();
     showStatus('Selection cleared', 'success');
-    
+
     // Send message to content script to clear highlights
     sendToContentScript({
       action: 'clearHighlights'
     });
   }
-  
+
   function clearExcludedElements() {
     excludedElements = [];
     showStatus('Exclusion cleared', 'success');
-    
+
     // Send message to content script to clear exclusion highlights
     sendToContentScript({
       action: 'clearExclusionHighlights'
     });
   }
-  
+
   function extractSelectedData() {
     if (selectedElements.length === 0) {
       showStatus('Please select at least one element', 'error');
       return;
     }
-    
+
     const extractType = elements.extractType.value;
-    
+
     // Send message to content script to extract data
     sendToContentScript({
       action: 'extractSelectedData',
@@ -247,29 +247,29 @@ document.addEventListener('DOMContentLoaded', function() {
       excludedElements: excludedElements,
       extractType: extractType
     });
-    
+
     showStatus('Extracting data...', 'success');
-    
+
     // Update step status
     updateStepStatus(3, 'completed');
   }
-  
+
   function showStatus(message, type) {
     elements.status.textContent = message;
     elements.status.className = `status ${type}`;
     elements.status.style.display = 'block';
-    
+
     setTimeout(() => {
       elements.status.style.display = 'none';
     }, 3000);
   }
-  
+
   function updateStepStatus(stepNumber, status) {
     const stepElement = document.getElementById(`step${stepNumber}`);
-    
+
     // Remove all status classes
     stepElement.classList.remove('active', 'completed');
-    
+
     // Add the appropriate status class
     if (status === 'active') {
       stepElement.classList.add('active');
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
       stepElement.classList.add('completed');
     }
   }
-  
+
   function sendToContentScript(message) {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       if (tabs && tabs[0]) {
@@ -285,17 +285,17 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  
+
   function closeSidebar() {
     // Send message to content script to clean up
     sendToContentScript({
       action: 'closeSidebar'
     });
-    
+
     // Close the sidebar window
     window.close();
   }
-  
+
   function showHelp() {
     alert(`Manual Selection Mode Help:
 
@@ -311,18 +311,18 @@ Tips:
 - Use exclusion mode to filter out unwanted elements like navigation links or ads.
 - For product extraction, select product containers to get structured data.`);
   }
-  
+
   // Listen for extracted data from content script
   chrome.runtime.onMessage.addListener((message) => {
     if (message.action === 'extractedData') {
       handleExtractedData(message.data, message.type);
     }
   });
-  
+
   function handleExtractedData(data, type) {
     // Display preview of extracted data
     elements.dataPreview.style.display = 'block';
-    
+
     if (type === 'text') {
       elements.dataPreview.textContent = data.map(item => item.text).join('\n\n');
     } else if (type === 'links') {
@@ -334,47 +334,47 @@ Tips:
     } else {
       elements.dataPreview.textContent = JSON.stringify(data, null, 2);
     }
-    
+
     // Store the data
     chrome.storage.local.get(['scrapedData'], (result) => {
       const scrapedData = result.scrapedData || {};
-      
+
       if (!scrapedData[type]) {
         scrapedData[type] = [];
       }
-      
+
       // Add new data
       if (Array.isArray(data)) {
         scrapedData[type] = [...scrapedData[type], ...data];
       } else {
         scrapedData[type].push(data);
       }
-      
+
       // Apply deduplication
       scrapedData[type] = deduplicateData(scrapedData[type], type);
-      
+
       chrome.storage.local.set({ scrapedData }, () => {
         // Notify background that data was updated
         chrome.runtime.sendMessage({ action: 'dataUpdated' });
       });
     });
-    
+
     showStatus(`Extracted ${data.length} items`, 'success');
   }
-  
+
   function deduplicateData(data, type) {
     if (!Array.isArray(data) || data.length === 0) {
       return data;
     }
-    
+
     // For simple data types (strings), use Set
     if (typeof data[0] === 'string') {
       return [...new Set(data)];
     }
-    
+
     // For objects, use specific fields for deduplication
     let keyFields = [];
-    
+
     switch (type) {
       case 'links':
         keyFields = ['href'];
@@ -396,7 +396,7 @@ Tips:
         });
         return Array.from(uniqueMap.values());
     }
-    
+
     // Deduplicate by key fields
     const uniqueMap = new Map();
     data.forEach(item => {
@@ -405,7 +405,7 @@ Tips:
         uniqueMap.set(compositeKey, item);
       }
     });
-    
+
     return Array.from(uniqueMap.values());
   }
 });
