@@ -20,12 +20,12 @@
     function clickHandler(e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         const target = e.target;
         const selector = getCssSelector(target);
-        
+
         chrome.runtime.sendMessage({ action: "selectorPicked", selector: selector });
-        
+
         // Cleanup
         document.removeEventListener('mousemove', mouseMoveHandler);
         document.removeEventListener('click', clickHandler, true);
