@@ -3,7 +3,7 @@
 // Initialize extension on installation
 chrome.runtime.onInstalled.addListener(() => {
   console.log('MyScraper extension installed');
-  
+
   // Set default settings
   chrome.storage.sync.set({
     // General settings
@@ -14,7 +14,7 @@ chrome.runtime.onInstalled.addListener(() => {
     autoDetect: true,
     enableManualSelection: true,
     sidebarPosition: 'right',
-    
+
     // Schedule settings
     scheduleEnabled: false,
     scheduleFrequency: 'daily',
@@ -22,7 +22,7 @@ chrome.runtime.onInstalled.addListener(() => {
     scheduleDataType: 'all',
     scheduleTime: '09:00',
     scheduleDayOfWeek: '1',
-    
+
     // Extraction settings
     extractEmailsOpt: true,
     extractPhonesOpt: true,
@@ -31,13 +31,13 @@ chrome.runtime.onInstalled.addListener(() => {
     extractProductsOpt: false,
     extractBusinessOpt: false,
     extractReviewsOpt: false,
-    
+
     // Export settings
     csvDelimiter: ',',
     includeHeaders: true,
     autoDownload: false,
     exportFilename: 'myscraper_data_{date}_{type}',
-    
+
     // Advanced settings
     requestDelay: 500,
     maxConcurrent: 3,
@@ -81,7 +81,7 @@ if (chrome.contextMenus) {
 function handleContextMenuExtraction(info, tab) {
   let extractionType = '';
   let extractionData = '';
-  
+
   if (info.selectionText) {
     extractionType = 'text';
     extractionData = info.selectionText;
@@ -92,20 +92,20 @@ function handleContextMenuExtraction(info, tab) {
     extractionType = 'image';
     extractionData = info.srcUrl;
   }
-  
+
   // Store the extracted data
   chrome.storage.local.get(['scrapedData'], (result) => {
     const scrapedData = result.scrapedData || {};
-    
+
     if (!scrapedData[extractionType]) {
       scrapedData[extractionType] = [];
     }
-    
+
     scrapedData[extractionType].push(extractionData);
-    
+
     // Remove duplicates
     scrapedData[extractionType] = [...new Set(scrapedData[extractionType])];
-    
+
     chrome.storage.local.set({ scrapedData }, () => {
       // Show notification
       if (chrome.notifications) {
@@ -128,23 +128,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       chrome.runtime.sendMessage({ action: 'refreshData' });
       sendResponse({ success: true });
       break;
-      
+
     case 'bulkScrape':
       startBulkScraping(message.urls, message.dataType, message.pagination, message.singlePage);
       sendResponse({ success: true });
       break;
-      
+
     case 'exportData':
       exportData(message.format);
       sendResponse({ success: true });
       break;
-      
+
     case 'bulkData':
       // Store the data from bulk scraping
       storeBulkData(message.data, message.url);
       sendResponse({ success: true });
       break;
-      
+
     case 'openSidebar':
       // Open the sidebar in the current tab
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
@@ -154,7 +154,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
       sendResponse({ success: true });
       break;
-      
+
     case 'settingsUpdated':
       // Handle settings updates
       if (message.settings && message.settings.scheduleEnabled) {
@@ -162,23 +162,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
       sendResponse({ success: true });
       break;
-      
+
     case 'scheduleUpdated':
       // Update schedule
       updateSchedule(message.schedule);
       sendResponse({ success: true });
       break;
-      
+
     case 'getScrapedData':
       chrome.storage.local.get(['scrapedData'], (result) => {
         sendResponse({ data: result.scrapedData || {} });
       });
       return true; // Keep message channel open for async response
-      
+
     default:
       sendResponse({ success: false, error: 'Unknown action' });
   }
-  
+
   return true; // This indicates we'll send a response asynchronously
 });
 
@@ -186,39 +186,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 function storeBulkData(data, url) {
   chrome.storage.local.get(['scrapedData'], (result) => {
     const scrapedData = result.scrapedData || {};
-    
+
     // Process based on data structure
     if (data.emails) {
       if (!scrapedData.emails) scrapedData.emails = [];
       scrapedData.emails = [...new Set([...scrapedData.emails, ...data.emails])];
     }
-    
+
     if (data.phones) {
       if (!scrapedData.phones) scrapedData.phones = [];
       scrapedData.phones = [...new Set([...scrapedData.phones, ...data.phones])];
     }
-    
+
     if (data.business) {
       if (!scrapedData.business) scrapedData.business = [];
       scrapedData.business = [...scrapedData.business, ...data.business];
     }
-    
+
     if (data.products) {
       if (!scrapedData.products) scrapedData.products = [];
       scrapedData.products = [...scrapedData.products, ...data.products];
     }
-    
+
     // Add to scraping history
     if (!scrapedData.scrapingHistory) scrapedData.scrapingHistory = [];
-    
+
     const historyEntry = {
       url: url,
       timestamp: Date.now(),
       dataTypes: Object.keys(data).filter(key => data[key] && data[key].length > 0)
     };
-    
+
     scrapedData.scrapingHistory.push(historyEntry);
-    
+
     chrome.storage.local.set({ scrapedData }, () => {
       chrome.runtime.sendMessage({ action: 'dataUpdated' });
     });
@@ -229,7 +229,7 @@ function storeBulkData(data, url) {
 function startBulkScraping(urls, dataType, pagination = null, singlePage = false) {
   let completed = 0;
   const total = urls.length;
-  
+
   // Process each URL
   urls.forEach((url, index) => {
     if (singlePage || !pagination || !pagination.enabled) {
@@ -241,7 +241,7 @@ function startBulkScraping(urls, dataType, pagination = null, singlePage = false
           completed: completed,
           total: total
         });
-        
+
         // Check if all URLs are processed
         if (completed === total) {
           chrome.runtime.sendMessage({
@@ -259,7 +259,7 @@ function startBulkScraping(urls, dataType, pagination = null, singlePage = false
           completed: completed,
           total: total
         });
-        
+
         // Check if all URLs are processed
         if (completed === total) {
           chrome.runtime.sendMessage({
@@ -278,7 +278,7 @@ function scrapeSinglePage(url, dataType, callback) {
     chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo, updatedTab) {
       if (tabId === tab.id && changeInfo.status === 'complete') {
         chrome.tabs.onUpdated.removeListener(listener);
-        
+
         // Scrape the page
         chrome.scripting.executeScript({
           target: { tabId: tab.id },
@@ -299,14 +299,14 @@ function scrapePageWithPagination(url, dataType, pagination, callback) {
     chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo, updatedTab) {
       if (tabId === tab.id && changeInfo.status === 'complete') {
         chrome.tabs.onUpdated.removeListener(listener);
-        
+
         // Scrape the first page
         scrapeCurrentPage(tab.id, dataType, () => {
           if (pagination && pagination.enabled) {
             // Handle pagination
             let currentPage = 1;
             const maxPages = pagination.pageCount;
-            
+
             function scrapeNextPage() {
               currentPage++;
               if (currentPage > maxPages) {
@@ -314,7 +314,7 @@ function scrapePageWithPagination(url, dataType, pagination, callback) {
                 callback();
                 return;
               }
-              
+
               // Find and click the next page link
               chrome.scripting.executeScript({
                 target: { tabId: tab.id },
@@ -326,7 +326,7 @@ function scrapePageWithPagination(url, dataType, pagination, callback) {
                 }, 2000);
               });
             }
-            
+
             scrapeNextPage();
           } else {
             chrome.tabs.remove(tab.id);
@@ -362,7 +362,7 @@ function clickNextPage() {
     '[aria-label="Next"]',
     '[title="Next"]'
   ];
-  
+
   // Try to find a "Next" button or link
   for (const selector of paginationSelectors) {
     const elements = document.querySelectorAll(selector);
@@ -374,7 +374,7 @@ function clickNextPage() {
       }
     }
   }
-  
+
   // If no "Next" button found, try to find a link with the next page number
   const currentPageElement = document.querySelector('.current, .active, [aria-current="page"]');
   if (currentPageElement) {
@@ -401,11 +401,11 @@ function scrapePage(dataType) {
     all: () => {
       // Extract all data types
       const data = {};
-      
+
       // Extract emails
       const emailRegex = /[\w\.-]+@[\w\.-]+\.\w+/g;
       data.emails = document.body.innerText.match(emailRegex) || [];
-      
+
       // Extract phones
       const phoneRegexes = [
         /\+\d{1,3}\s?\(\d{3}\)\s?\d{3}[-\s]?\d{4}/g,
@@ -419,7 +419,7 @@ function scrapePage(dataType) {
         data.phones.push(...matches);
       });
       data.phones = [...new Set(data.phones)];
-      
+
       // Extract business data
       data.business = [];
       document.querySelectorAll('.business, .company, [itemtype*="Business"]').forEach(el => {
@@ -431,23 +431,23 @@ function scrapePage(dataType) {
           email: el.querySelector('.email')?.innerText.trim() || '',
           url: window.location.href
         };
-        
+
         if (business.name || business.address) {
           data.business.push(business);
         }
       });
-      
+
       // Extract product data
       data.products = extractProducts();
-      
+
       return data;
     },
-    
+
     emails: () => {
       const emailRegex = /[\w\.-]+@[\w\.-]+\.\w+/g;
       return document.body.innerText.match(emailRegex) || [];
     },
-    
+
     phones: () => {
       const phoneRegexes = [
         /\+\d{1,3}\s?\(\d{3}\)\s?\d{3}[-\s]?\d{4}/g,
@@ -462,7 +462,7 @@ function scrapePage(dataType) {
       });
       return [...new Set(phones)];
     },
-    
+
     business: () => {
       const businesses = [];
       document.querySelectorAll('.business, .company, [itemtype*="Business"]').forEach(el => {
@@ -474,27 +474,27 @@ function scrapePage(dataType) {
           email: el.querySelector('.email')?.innerText.trim() || '',
           url: window.location.href
         };
-        
+
         if (business.name || business.address) {
           businesses.push(business);
         }
       });
       return businesses;
     },
-    
+
     products: () => {
       return extractProducts();
     },
-    
+
     reviews: () => {
       const reviews = [];
-      
+
       // Common review selectors
       const reviewSelectors = [
         '.review', '.comment', '.testimonial',
         '[itemtype*="Review"]', '[itemtype*="Comment"]'
       ];
-      
+
       reviewSelectors.forEach(selector => {
         document.querySelectorAll(selector).forEach(el => {
           const review = {
@@ -504,43 +504,43 @@ function scrapePage(dataType) {
             content: el.querySelector('.content, .text, [itemprop="reviewBody"]')?.innerText.trim() || '',
             url: window.location.href
           };
-          
+
           if (review.content) {
             reviews.push(review);
           }
         });
       });
-      
+
       return reviews;
     }
   };
-  
+
   // Helper function to extract products
   function extractProducts() {
     const products = [];
-    
+
     // Common product selectors for different e-commerce sites
     const productSelectors = [
       // Amazon
       '[data-component-type="s-search-result"]',
       '#dp-container',
-      
+
       // eBay
       '.s-item',
-      
+
       // General e-commerce
       '.product',
       '.product-card',
       '.product-item',
       '[data-testid="product-card"]',
-      
+
       // Schema.org markup
       '[itemtype*="Product"]'
     ];
-    
+
     // Try to find product containers
     let productContainers = [];
-    
+
     productSelectors.forEach(selector => {
       const elements = document.querySelectorAll(selector);
       if (elements.length > 0) {
@@ -548,7 +548,7 @@ function scrapePage(dataType) {
         return; // Stop after finding the first selector with results
       }
     });
-    
+
     // Extract data from each product container
     productContainers.forEach(container => {
       const product = {
@@ -557,33 +557,33 @@ function scrapePage(dataType) {
         image: extractProductImage(container),
         url: extractProductURL(container)
       };
-      
+
       // Only add if we have at least a name or price
       if (product.name || product.price) {
         products.push(product);
       }
     });
-    
+
     return products;
   }
-  
+
   // Helper functions for product extraction
   function extractProductName(container) {
     const nameSelectors = ['h1', '.product-title', '.product-name', '[itemprop="name"]', '#productTitle'];
-    
+
     for (const selector of nameSelectors) {
       const element = container.querySelector(selector);
       if (element && element.innerText.trim()) {
         return element.innerText.trim();
       }
     }
-    
+
     return '';
   }
-  
+
   function extractProductPrice(container) {
     const priceSelectors = ['.price', '.product-price', '[itemprop="price"]', '.a-price .a-offscreen', '#priceblock_ourprice'];
-    
+
     for (const selector of priceSelectors) {
       const element = container.querySelector(selector);
       if (element) {
@@ -594,39 +594,39 @@ function scrapePage(dataType) {
         }
       }
     }
-    
+
     return '';
   }
-  
+
   function extractProductImage(container) {
     const imageSelectors = ['.product-image', '[itemprop="image"]', '#landingImage', 'img[src*="product"]'];
-    
+
     for (const selector of imageSelectors) {
       const element = container.querySelector(selector);
       if (element && element.src) {
         return element.src;
       }
     }
-    
+
     return '';
   }
-  
+
   function extractProductURL(container) {
     const linkSelectors = ['a[href*="product"]', 'a[href*="item"]', 'a[href*="dp/"]'];
-    
+
     for (const selector of linkSelectors) {
       const element = container.querySelector(selector);
       if (element && element.href) {
         return element.href;
       }
     }
-    
+
     return window.location.href;
   }
-  
+
   // Extract data based on the specified type
   const data = extractors[dataType] ? extractors[dataType]() : extractors.all();
-  
+
   // Send data back to background script
   chrome.runtime.sendMessage({
     action: 'bulkData',
@@ -639,40 +639,40 @@ function scrapePage(dataType) {
 function exportData(format) {
   chrome.storage.local.get(['scrapedData'], (result) => {
     const data = result.scrapedData || {};
-    
+
     let content = '';
     let filename = 'myscraper_data';
     let mimeType = '';
-    
+
     switch (format) {
       case 'csv':
         content = convertToCSV(data);
         filename += '.csv';
         mimeType = 'text/csv';
         break;
-        
+
       case 'xlsx':
         // For Excel export, we'll use HTML table format
         content = convertToHTMLTable(data);
         filename += '.html';
         mimeType = 'text/html';
         break;
-        
+
       case 'json':
         content = JSON.stringify(data, null, 2);
         filename += '.json';
         mimeType = 'application/json';
         break;
     }
-    
+
     // Create a blob and download it
     const blob = new Blob([content], { type: mimeType });
-    
+
     // Convert blob to data URL
     const reader = new FileReader();
     reader.onloadend = function() {
       const dataUrl = reader.result;
-      
+
       // Use chrome.downloads API with data URL
       chrome.downloads.download({
         url: dataUrl,
@@ -687,7 +687,7 @@ function exportData(format) {
 // Convert data to CSV format
 function convertToCSV(data) {
   let csv = '';
-  
+
   // Add emails
   if (data.emails && data.emails.length > 0) {
     csv += 'Emails\n';
@@ -696,7 +696,7 @@ function convertToCSV(data) {
     });
     csv += '\n';
   }
-  
+
   // Add phones
   if (data.phones && data.phones.length > 0) {
     csv += 'Phone Numbers\n';
@@ -705,7 +705,7 @@ function convertToCSV(data) {
     });
     csv += '\n';
   }
-  
+
   // Add business data
   if (data.business && data.business.length > 0) {
     csv += 'Business Data\n';
@@ -715,7 +715,7 @@ function convertToCSV(data) {
     });
     csv += '\n';
   }
-  
+
   // Add products
   if (data.products && data.products.length > 0) {
     csv += 'Product Data\n';
@@ -725,7 +725,7 @@ function convertToCSV(data) {
     });
     csv += '\n';
   }
-  
+
   // Add links
   if (data.links && data.links.length > 0) {
     csv += 'Links\n';
@@ -735,7 +735,7 @@ function convertToCSV(data) {
     });
     csv += '\n';
   }
-  
+
   // Add images
   if (data.images && data.images.length > 0) {
     csv += 'Images\n';
@@ -744,14 +744,14 @@ function convertToCSV(data) {
       csv += `"${image.src}","${image.alt}",${image.width},${image.height}\n`;
     });
   }
-  
+
   return csv;
 }
 
 // Convert data to HTML table format
 function convertToHTMLTable(data) {
   let html = '<!DOCTYPE html><html><head><title>MyScraper Data</title><style>table {border-collapse: collapse; width: 100%;} th, td {border: 1px solid #ddd; padding: 8px; text-align: left;} th {background-color: #f2f2f2;} img {max-width: 100px;}</style></head><body>';
-  
+
   // Add emails
   if (data.emails && data.emails.length > 0) {
     html += '<h2>Emails</h2><table>';
@@ -760,7 +760,7 @@ function convertToHTMLTable(data) {
     });
     html += '</table>';
   }
-  
+
   // Add phones
   if (data.phones && data.phones.length > 0) {
     html += '<h2>Phone Numbers</h2><table>';
@@ -769,7 +769,7 @@ function convertToHTMLTable(data) {
     });
     html += '</table>';
   }
-  
+
   // Add business data
   if (data.business && data.business.length > 0) {
     html += '<h2>Business Data</h2><table><tr><th>Name</th><th>Address</th><th>Phone</th><th>Website</th><th>Email</th></tr>';
@@ -784,7 +784,7 @@ function convertToHTMLTable(data) {
     });
     html += '</table>';
   }
-  
+
   // Add products
   if (data.products && data.products.length > 0) {
     html += '<h2>Product Data</h2><table><tr><th>Name</th><th>Price</th><th>Image</th><th>URL</th></tr>';
@@ -798,7 +798,7 @@ function convertToHTMLTable(data) {
     });
     html += '</table>';
   }
-  
+
   html += '</body></html>';
   return html;
 }
@@ -814,12 +814,12 @@ function updateSchedule(schedule) {
     chrome.alarms.clear(scheduleAlarm);
     scheduleAlarm = null;
   }
-  
+
   if (scheduleCheckInterval) {
     clearInterval(scheduleCheckInterval);
     scheduleCheckInterval = null;
   }
-  
+
   // Set up new schedule if enabled
   if (schedule.enabled) {
     setupSchedule(schedule);
@@ -829,32 +829,32 @@ function updateSchedule(schedule) {
 // Set up schedule based on frequency
 function setupSchedule(schedule) {
   const urls = schedule.urls.split('\n').map(url => url.trim()).filter(url => url !== '');
-  
+
   if (urls.length === 0) {
     return;
   }
-  
+
   switch (schedule.frequency) {
     case 'hourly':
       // Create an alarm that triggers every hour
       chrome.alarms.create('hourlyScraping', { periodInMinutes: 60 });
       scheduleAlarm = 'hourlyScraping';
       break;
-      
+
     case 'daily':
       // Check every minute if it's time to run
       scheduleCheckInterval = setInterval(() => {
         checkIfTimeToRun(schedule, urls);
       }, 60000); // Check every minute
       break;
-      
+
     case 'weekly':
       // Check every minute if it's time to run
       scheduleCheckInterval = setInterval(() => {
         checkIfTimeToRun(schedule, urls);
       }, 60000); // Check every minute
       break;
-      
+
     case 'monthly':
       // Check every hour if it's time to run
       scheduleCheckInterval = setInterval(() => {
@@ -870,26 +870,26 @@ function checkIfTimeToRun(schedule, urls) {
   const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
   const currentHours = now.getHours();
   const currentMinutes = now.getMinutes();
-  
+
   // Parse schedule time
   const [scheduleHours, scheduleMinutes] = schedule.time.split(':').map(Number);
-  
+
   // Check if it's the right day and time
   let shouldRun = false;
-  
+
   if (schedule.frequency === 'daily') {
     shouldRun = currentHours === scheduleHours && currentMinutes === scheduleMinutes;
   } else if (schedule.frequency === 'weekly') {
-    shouldRun = currentDay === parseInt(schedule.dayOfWeek) && 
-                currentHours === scheduleHours && 
+    shouldRun = currentDay === parseInt(schedule.dayOfWeek) &&
+                currentHours === scheduleHours &&
                 currentMinutes === scheduleMinutes;
   } else if (schedule.frequency === 'monthly') {
     // Check if it's the first day of the month and the right time
-    shouldRun = now.getDate() === 1 && 
-                currentHours === scheduleHours && 
+    shouldRun = now.getDate() === 1 &&
+                currentHours === scheduleHours &&
                 currentMinutes === scheduleMinutes;
   }
-  
+
   if (shouldRun) {
     // Run the scheduled scraping
     runScheduledScraping(urls, schedule.dataType);
@@ -907,7 +907,7 @@ function runScheduledScraping(urls, dataType) {
       message: `Running scheduled scraping for ${urls.length} URLs`
     });
   }
-  
+
   // Start bulk scraping
   startBulkScraping(urls, dataType, null, true);
 }
@@ -918,7 +918,7 @@ if (chrome.alarms) {
     if (alarm.name === 'hourlyScraping') {
       chrome.storage.sync.get(['scheduleUrls', 'scheduleDataType'], (result) => {
         const urls = result.scheduleUrls.split('\n').map(url => url.trim()).filter(url => url !== '');
-        
+
         if (urls.length > 0) {
           runScheduledScraping(urls, result.scheduleDataType);
         }
