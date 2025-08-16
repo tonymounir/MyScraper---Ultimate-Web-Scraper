@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MyScraper - Manual Selection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4285f4;
+      --secondary-color: #34a853;
+      --accent-color: #fbbc05;
+      --danger-color: #ea4335;
+      --dark-color: #202124;
+      --light-color: #f8f9fa;
+      --border-color: #dadce0;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      width: 320px;
+      min-height: 100vh;
+      color: var(--dark-color);
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .header img {
+      width: 32px;
+      height: 32px;
+      margin-right: 10px;
+    }
+    
+    .header h1 {
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    .content {
+      padding: 15px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .step {
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: var(--light-color);
+      border-left: 4px solid var(--primary-color);
+    }
+    
+    .step-title {
+      font-weight: 500;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 50%;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+    
+    .step.active {
+      border-left-color: var(--secondary-color);
+    }
+    
+    .step.active .step-number {
+      background-color: var(--secondary-color);
+    }
+    
+    .step.completed {
+      border-left-color: var(--accent-color);
+    }
+    
+    .step.completed .step-number {
+      background-color: var(--accent-color);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn i {
+      margin-right: 8px;
+    }
+    
+    .btn:hover {
+      background-color: #3367d6;
+    }
+    
+    .btn-secondary {
+      background-color: var(--light-color);
+      color: var(--dark-color);
+      border: 1px solid var(--border-color);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #e8eaed;
+    }
+    
+    .btn-success {
+      background-color: var(--secondary-color);
+    }
+    
+    .btn-success:hover {
+      background-color: #2d9249;
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+    
+    .btn-danger:hover {
+      background-color: #d33b27;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .btn-group .btn {
+      margin-bottom: 0;
+    }
+    
+    .selection-mode {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #e8f0fe;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    .selection-mode.active {
+      background-color: #e6f4ea;
+    }
+    
+    .selection-list {
+      margin-top: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+    }
+    
+    .selection-item {
+      padding: 10px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .selection-item:last-child {
+      border-bottom: none;
+    }
+    
+    .selection-item-info {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .selection-item-remove {
+      background: none;
+      border: none;
+      color: var(--danger-color);
+      cursor: pointer;
+      padding: 5px;
+    }
+    
+    .exclusion-mode {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #fce8e6;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    .exclusion-mode.active {
+      background-color: #f8d7da;
+    }
+    
+    .footer {
+      padding: 10px 15px;
+      background-color: var(--light-color);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .footer button {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .status {
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .status.success {
+      background-color: rgba(52, 168, 83, 0.1);
+      color: var(--secondary-color);
+      border: 1px solid rgba(52, 168, 83, 0.3);
+    }
+    
+    .status.error {
+      background-color: rgba(234, 67, 53, 0.1);
+      color: var(--danger-color);
+      border: 1px solid rgba(234, 67, 53, 0.3);
+    }
+    
+    .data-preview {
+      margin-top: 15px;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 10px;
+      background-color: var(--light-color);
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="icons/icon48.png" alt="MyScraper">
+    <h1>Manual Selection</h1>
+  </div>
+  
+  <div class="content">
+    <div class="step active" id="step1">
+      <div class="step-title">
+        <span class="step-number">1</span>
+        Select Elements
+      </div>
+      <p>Click on elements you want to extract. Selected elements will be highlighted.</p>
+      
+      <div class="btn-group">
+        <button id="startSelection" class="btn">
+          <i class="fas fa-mouse-pointer"></i> Start Selection
+        </button>
+        <button id="clearSelection" class="btn btn-secondary">
+          <i class="fas fa-eraser"></i> Clear
+        </button>
+      </div>
+      
+      <div class="selection-mode" id="selectionMode">
+        Selection mode: <strong>OFF</strong>
+      </div>
+      
+      <div class="selection-list" id="selectionList">
+        <div style="padding: 20px; text-align: center; color: #666;">
+          No elements selected yet
+        </div>
+      </div>
+    </div>
+    
+    <div class="step" id="step2">
+      <div class="step-title">
+        <span class="step-number">2</span> Exclude Elements (Optional)
+      </div>
+      <p>Click on elements you want to exclude from extraction (e.g., category links, ads).</p>
+      
+      <div class="btn-group">
+        <button id="startExclusion" class="btn btn-secondary">
+          <i class="fas fa-ban"></i> Start Exclusion
+        </button>
+        <button id="clearExclusion" class="btn btn-secondary">
+          <i class="fas fa-eraser"></i> Clear
+        </button>
+      </div>
+      
+      <div class="exclusion-mode" id="exclusionMode">
+        Exclusion mode: <strong>OFF</strong>
+      </div>
+    </div>
+    
+    <div class="step" id="step3">
+      <div class="step-title">
+        <span class="step-number">3</span> Extract Data
+      </div>
+      <p>Choose what data to extract from the selected elements.</p>
+      
+      <div class="form-group">
+        <label for="extractType">Data Type:</label>
+        <select id="extractType" class="form-control">
+          <option value="text">Text Content</option>
+          <option value="links">Links (URLs)</option>
+          <option value="images">Images (URLs)</option>
+          <option value="products">Product Information</option>
+          <option value="custom">Custom Data</option>
+        </select>
+      </div>
+      
+      <button id="extractData" class="btn btn-success">
+        <i class="fas fa-download"></i> Extract Selected Data
+      </button>
+      
+      <div id="dataPreview" class="data-preview" style="display: none;"></div>
+    </div>
+    
+    <div id="status" class="status"></div>
+  </div>
+  
+  <div class="footer">
+    <button id="closeSidebar">
+      <i class="fas fa-times"></i> Close
+    </button>
+    <button id="helpButton">
+      <i class="fas fa-question-circle"></i> Help
+    </button>
+  </div>
+  
+  <script src="sidebar.js"></script>
+</body>
+</html>

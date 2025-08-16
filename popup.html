@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MyScraper - Professional Web Scraper</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4285f4;
+      --secondary-color: #34a853;
+      --accent-color: #fbbc05;
+      --danger-color: #ea4335;
+      --dark-color: #202124;
+      --light-color: #f8f9fa;
+      --border-color: #dadce0;
+      --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      --shadow-hover: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      width: 400px;
+      color: var(--dark-color);
+      background-color: #fff;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 8px 8px 0 0;
+    }
+    
+    .header img {
+      width: 32px;
+      height: 32px;
+      margin-right: 10px;
+    }
+    
+    .header h1 {
+      font-size: 20px;
+      font-weight: 500;
+    }
+    
+    .tab-container {
+      display: flex;
+      background-color: var(--light-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 12px 0;
+      text-align: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--dark-color);
+      transition: all 0.2s ease;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab:hover {
+      background-color: rgba(66, 133, 244, 0.1);
+    }
+    
+    .tab.active {
+      color: var(--primary-color);
+      border-bottom: 3px solid var(--primary-color);
+    }
+    
+    .tab i {
+      margin-right: 5px;
+    }
+    
+    .content {
+      padding: 15px;
+      height: 400px;
+      overflow-y: auto;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .card-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 15px;
+      color: var(--dark-color);
+      display: flex;
+      align-items: center;
+    }
+    
+    .card-title i {
+      margin-right: 8px;
+      color: var(--primary-color);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn i {
+      margin-right: 8px;
+    }
+    
+    .btn:hover {
+      background-color: #3367d6;
+    }
+    
+    .btn-secondary {
+      background-color: var(--light-color);
+      color: var(--dark-color);
+      border: 1px solid var(--border-color);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #e8eaed;
+    }
+    
+    .btn-success {
+      background-color: var(--secondary-color);
+    }
+    
+    .btn-success:hover {
+      background-color: #2d9249;
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+    
+    .btn-danger:hover {
+      background-color: #d33b27;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .btn-group .btn {
+      margin-bottom: 0;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.2s ease;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    
+    textarea.form-control {
+      min-height: 80px;
+      resize: vertical;
+    }
+    
+    .data-types {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .data-type {
+      background-color: var(--light-color);
+      color: var(--dark-color);
+      border-radius: 16px;
+      padding: 6px 12px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border-color);
+    }
+    
+    .data-type i {
+      margin-right: 6px;
+      color: var(--primary-color);
+    }
+    
+    .data-type .count {
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 12px;
+      padding: 2px 8px;
+      margin-left: 6px;
+      font-size: 11px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .stat-card {
+      background-color: var(--light-color);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: var(--dark-color);
+      margin-top: 5px;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .status {
+      padding: 10px;
+      margin-top: 15px;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .status.success {
+      background-color: rgba(52, 168, 83, 0.1);
+      color: var(--secondary-color);
+      border: 1px solid rgba(52, 168, 83, 0.3);
+    }
+    
+    .status.error {
+      background-color: rgba(234, 67, 53, 0.1);
+      color: var(--danger-color);
+      border: 1px solid rgba(234, 67, 53, 0.3);
+    }
+    
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 15px;
+      background-color: var(--light-color);
+      border-top: 1px solid var(--border-color);
+      font-size: 12px;
+    }
+    
+    .footer a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    
+    .highlight-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .btn-highlight {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      background-color: var(--light-color);
+      color: var(--dark-color);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+    }
+    
+    .btn-highlight i {
+      margin-right: 5px;
+    }
+    
+    .btn-highlight:hover {
+      background-color: #e8eaed;
+    }
+    
+    .radio-group {
+      margin-bottom: 15px;
+    }
+    
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    
+    .radio-group input[type="radio"] {
+      margin-right: 8px;
+    }
+    
+    .pagination-options {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: var(--light-color);
+      border-radius: 4px;
+      display: none;
+    }
+    
+    .manual-detection-result {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: var(--light-color);
+      border-radius: 4px;
+      display: none;
+    }
+    
+    .progress-bar {
+      height: 4px;
+      background-color: var(--border-color);
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    
+    .progress {
+      height: 100%;
+      background-color: var(--primary-color);
+      width: 0;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="icons/icon48.png" alt="MyScraper">
+    <h1>MyScraper</h1>
+  </div>
+  
+  <div class="tab-container">
+    <div class="tab active" data-tab="home">
+      <i class="fas fa-home"></i> Home
+    </div>
+    <div class="tab" data-tab="extract">
+      <i class="fas fa-search"></i> Extract
+    </div>
+    <div class="tab" data-tab="bulk">
+      <i class="fas fa-layer-group"></i> Bulk
+    </div>
+    <div class="tab" data-tab="export">
+      <i class="fas fa-download"></i> Export
+    </div>
+  </div>
+  
+  <div class="content">
+    <!-- Home Tab -->
+    <div class="tab-content active" id="home-tab">
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-chart-bar"></i> Data Summary
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="emailCount">0</div>
+            <div class="stat-label">Emails</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="phoneCount">0</div>
+            <div class="stat-label">Phones</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="businessCount">0</div>
+            <div class="stat-label">Businesses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="productCount">0</div>
+            <div class="stat-label">Products</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-magic"></i> Auto-Detection
+        </div>
+        <div id="autoDetectStatus" style="margin-bottom: 15px; display: flex; align-items: center;">
+          <span class="loading"></span> Detecting data on current page...
+        </div>
+        <div id="dataTypes" class="data-types"></div>
+        <button id="autoExtract" class="btn btn-success" style="display: none;">
+          <i class="fas fa-download"></i> Extract All Detected Data
+        </button>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-bolt"></i> Quick Actions
+        </div>
+        <button id="extractEmails" class="btn">
+          <i class="fas fa-envelope"></i> Extract Emails
+        </button>
+        <button id="extractPhones" class="btn">
+          <i class="fas fa-phone"></i> Extract Phones
+        </button>
+        <button id="extractLinks" class="btn">
+          <i class="fas fa-link"></i> Extract Links
+        </button>
+        <button id="extractProducts" class="btn">
+          <i class="fas fa-shopping-cart"></i> Extract Products
+        </button>
+      </div>
+    </div>
+    
+    <!-- Extract Tab -->
+    <div class="tab-content" id="extract-tab">
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-search"></i> Data Extraction
+        </div>
+        <button id="extractList" class="btn">
+          <i class="fas fa-list"></i> Extract Lists/Tables
+        </button>
+        <button id="extractImages" class="btn">
+          <i class="fas fa-image"></i> Extract Images
+        </button>
+        <div class="btn-group">
+          <button id="extractBusiness" class="btn">
+            <i class="fas fa-building"></i> Businesses
+          </button>
+          <button id="extractJobs" class="btn">
+            <i class="fas fa-briefcase"></i> Jobs
+          </button>
+        </div>
+        <div class="btn-group">
+          <button id="extractSocial" class="btn">
+            <i class="fas fa-share-alt"></i> Social Media
+          </button>
+          <button id="extractReviews" class="btn">
+            <i class="fas fa-star"></i> Reviews
+          </button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-mouse-pointer"></i> Manual Selection
+        </div>
+        <button id="manualSelection" class="btn btn-secondary">
+          <i class="fas fa-mouse-pointer"></i> Open Manual Selection Sidebar
+        </button>
+        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+          Open a sidebar to manually select elements for extraction. This gives you precise control over what data to extract.
+        </p>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-highlighter"></i> Highlight Detected Elements
+        </div>
+        <div class="highlight-buttons">
+          <button class="btn-highlight" data-type="emails">
+            <i class="fas fa-envelope"></i> Emails
+          </button>
+          <button class="btn-highlight" data-type="phones">
+            <i class="fas fa-phone"></i> Phones
+          </button>
+          <button class="btn-highlight" data-type="business">
+            <i class="fas fa-building"></i> Businesses
+          </button>
+          <button class="btn-highlight" data-type="products">
+            <i class="fas fa-shopping-cart"></i> Products
+          </button>
+          <button class="btn-highlight" data-type="images">
+            <i class="fas fa-image"></i> Images
+          </button>
+          <button class="btn-highlight" data-type="links">
+            <i class="fas fa-link"></i> Links
+          </button>
+          <button class="btn-highlight" data-type="reviews">
+            <i class="fas fa-star"></i> Reviews
+          </button>
+        </div>
+        <button id="clearHighlights" class="btn btn-secondary">
+          <i class="fas fa-eraser"></i> Clear Highlights
+        </button>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-mouse-pointer"></i> Manual Detection
+        </div>
+        <button id="startManualDetection" class="btn btn-secondary">
+          <i class="fas fa-crosshairs"></i> Select Element Manually
+        </button>
+        <div id="manualDetectionResult" class="manual-detection-result">
+          <div class="form-group">
+            <label for="customSelector">CSS Selector:</label>
+            <input type="text" id="customSelector" class="form-control">
+          </div>
+          <button id="extractWithSelector" class="btn">
+            <i class="fas fa-download"></i> Extract with Selector
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bulk Tab -->
+    <div class="tab-content" id="bulk-tab">
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-layer-group"></i> Bulk Scraping
+        </div>
+        <div class="form-group">
+          <label for="bulkUrls">Enter URLs (one per line):</label>
+          <textarea id="bulkUrls" class="form-control" placeholder="https://example.com/page1&#10;https://example.com/page2"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="bulkDataType">Data Type:</label>
+          <select id="bulkDataType" class="form-control">
+            <option value="all">All Data</option>
+            <option value="emails">Emails Only</option>
+            <option value="phones">Phones Only</option>
+            <option value="business">Business Details</option>
+            <option value="products">Product Details</option>
+            <option value="reviews">Reviews Only</option>
+          </select>
+        </div>
+        
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="scrapingMode" value="single" checked>
+            Single Page Only
+          </label>
+          <label>
+            <input type="radio" name="scrapingMode" value="pagination">
+            Multi-Page with Pagination
+          </label>
+        </div>
+        
+        <div id="paginationOptions" class="pagination-options">
+          <div class="form-group">
+            <label for="paginationPages">Number of pages:</label>
+            <input type="number" id="paginationPages" class="form-control" min="1" max="50" value="5">
+          </div>
+        </div>
+        
+        <button id="bulkScrape" class="btn btn-success">
+          <i class="fas fa-play"></i> Start Bulk Scraping
+        </button>
+        
+        <div class="progress-bar">
+          <div id="bulkProgress" class="progress"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Export Tab -->
+    <div class="tab-content" id="export-tab">
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-download"></i> Export Data
+        </div>
+        <div class="form-group">
+          <label for="exportFormat">Export Format:</label>
+          <select id="exportFormat" class="form-control">
+            <option value="csv">CSV (Comma Separated Values)</option>
+            <option value="xlsx">Excel (HTML Table)</option>
+            <option value="json">JSON (JavaScript Object Notation)</option>
+          </select>
+        </div>
+        
+        <button id="exportData" class="btn">
+          <i class="fas fa-file-export"></i> Export Extracted Data
+        </button>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">
+          <i class="fas fa-chart-pie"></i> Data Summary
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="exportEmailCount">0</div>
+            <div class="stat-label">Emails</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="exportPhoneCount">0</div>
+            <div class="stat-label">Phones</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="exportBusinessCount">0</div>
+            <div class="stat-label">Businesses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="exportProductCount">0</div>
+            <div class="stat-label">Products</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="status" class="status"></div>
+  
+  <div class="footer">
+    <a href="#" id="optionsLink">
+      <i class="fas fa-cog"></i> Settings
+    </a>
+    <a href="#" id="helpLink">
+      <i class="fas fa-question-circle"></i> Help
+    </a>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
