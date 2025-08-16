@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MyScraper Options</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+      background-color: #f8f9fa;
+    }
+    h1 {
+      color: #4285f4;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .section {
+      margin-bottom: 25px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #5f6368;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #202124;
+    }
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #4285f4;
+      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #3367d6;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    .checkbox-group input {
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    .status {
+      padding: 12px;
+      margin-top: 15px;
+      border-radius: 4px;
+      display: none;
+      text-align: center;
+      font-weight: 500;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #ddd;
+    }
+    .tab {
+      padding: 12px 20px;
+      background-color: #f1f1f1;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      cursor: pointer;
+      border-radius: 4px 4px 0 0;
+      margin-right: 5px;
+      transition: all 0.3s;
+    }
+    .tab:hover {
+      background-color: #e8eaed;
+    }
+    .tab.active {
+      background-color: white;
+      font-weight: bold;
+      color: #4285f4;
+      border-bottom: 1px solid white;
+      margin-bottom: -1px;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .button-group button {
+      flex: 1;
+    }
+    .danger-button {
+      background-color: #ea4335;
+    }
+    .danger-button:hover {
+      background-color: #d33b27;
+    }
+    .secondary-button {
+      background-color: #f1f1f1;
+      color: #5f6368;
+      border: 1px solid #ddd;
+    }
+    .secondary-button:hover {
+      background-color: #e8eaed;
+    }
+    .divider {
+      height: 1px;
+      background-color: #eee;
+      margin: 20px 0;
+    }
+    .export-preview {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>MyScraper Options</h1>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="general">General</div>
+    <div class="tab" data-tab="extraction">Extraction</div>
+    <div class="tab" data-tab="export">Export</div>
+    <div class="tab" data-tab="advanced">Advanced</div>
+  </div>
+
+  <div class="tab-content active" id="general-tab">
+    <div class="section">
+      <h2>General Settings</h2>
+
+      <div class="form-group">
+        <label for="defaultExport">Default Export Format</label>
+        <select id="defaultExport">
+          <option value="csv">CSV</option>
+          <option value="xlsx">Excel (HTML Table)</option>
+          <option value="json">JSON</option>
+        </select>
+        <div class="help-text">Default format for exporting scraped data</div>
+      </div>
+
+      <div class="form-group">
+        <label for="notificationTimeout">Notification Timeout (ms)</label>
+        <input type="number" id="notificationTimeout" min="1000" max="10000" step="500">
+        <div class="help-text">How long notifications should be displayed (1000-10000ms)</div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="autoScrape">
+          Enable auto-scraping on page load
+        </label>
+        <div class="help-text">Automatically scrape data when a page loads</div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="showNotifications">
+          Show notifications when data is extracted
+        </label>
+        <div class="help-text">Display notifications when scraping is complete</div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="autoDetect">
+          Enable auto-detection of data types
+        </label>
+        <div class="help-text">Automatically detect what types of data are available on a page</div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="enableManualSelection">
+          Enable Manual Selection Mode
+        </label>
+        <div class="help-text">Allow manual selection of elements for extraction</div>
+      </div>
+
+      <div class="form-group">
+        <label for="sidebarPosition">Sidebar Position</label>
+        <select id="sidebarPosition">
+          <option value="right">Right Side</option>
+          <option value="left">Left Side</option>
+        </select>
+        <div class="help-text">Position of the manual selection sidebar</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Scheduled Scraping</h2>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="scheduleEnabled">
+          Enable Scheduled Scraping
+        </label>
+        <div class="help-text">Automatically scrape websites at scheduled intervals</div>
+      </div>
+
+      <div class="form-group">
+        <label for="scheduleFrequency">Frequency</label>
+        <select id="scheduleFrequency">
+          <option value="hourly">Hourly</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="scheduleUrls">URLs to Scrape (one per line)</label>
+        <textarea id="scheduleUrls" rows="5" placeholder="https://example.com/page1&#10;https://example.com/page2"></textarea>
+        <div class="help-text">Enter the URLs you want to scrape automatically</div>
+      </div>
+
+      <div class="form-group">
+        <label for="scheduleDataType">Data Type</label>
+        <select id="scheduleDataType">
+          <option value="all">All Data</option>
+          <option value="emails">Emails Only</option>
+          <option value="phones">Phones Only</option>
+          <option value="business">Business Details</option>
+          <option value="products">Product Details</option>
+          <option value="reviews">Reviews Only</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="scheduleTime">Time of Day (for daily/weekly)</label>
+        <input type="time" id="scheduleTime">
+        <div class="help-text">When to perform scheduled scraping</div>
+      </div>
+
+      <div class="form-group">
+        <label for="scheduleDayOfWeek">Day of Week (for weekly)</label>
+        <select id="scheduleDayOfWeek">
+          <option value="0">Sunday</option>
+          <option value="1">Monday</option>
+          <option value="2">Tuesday</option>
+          <option value="3">Wednesday</option>
+          <option value="4">Thursday</option>
+          <option value="5">Friday</option>
+          <option value="6">Saturday</option>
+        </select>
+      </div>
+
+      <button id="saveSchedule" class="secondary-button">Save Schedule</button>
+    </div>
+  </div>
+
+  <div class="tab-content" id="extraction-tab">
+    <div class="section">
+      <h2>Data Extraction Settings</h2>
+
+      <div class="form-group">
+        <label>Data Types to Extract</label>
+        <div class="checkbox-group">
+          <label>
+            <input type="checkbox" id="extractEmailsOpt" checked>
+            Email Addresses
+          </label>
+          <label>
+            <input type="checkbox" id="extractPhonesOpt" checked>
+            Phone Numbers
+          </label>
+          <label>
+            <input type="checkbox" id="extractLinksOpt" checked>
+            Links
+          </label>
+          <label>
+            <input type="checkbox" id="extractImagesOpt">
+            Images
+          </label>
+          <label>
+            <input type="checkbox" id="extractProductsOpt">
+            Products
+          </label>
+          <label>
+            <input type="checkbox" id="extractBusinessOpt">
+            Businesses
+          </label>
+          <label>
+            <input type="checkbox" id="extractReviewsOpt">
+            Reviews
+          </label>
+          <label>
+            <input type="checkbox" id="extractNewsOpt">
+            News Articles
+          </label>
+          <label>
+            <input type="checkbox" id="extractEventsOpt">
+            Events
+          </label>
+          <label>
+            <input type="checkbox" id="extractRealEstateOpt">
+            Real Estate
+          </label>
+        </div>
+        <div class="help-text">Select which data types to extract by default</div>
+      </div>
+
+      <div class="form-group">
+        <label for="customSelectors">Custom CSS Selectors (one per line)</label>
+        <textarea id="customSelectors" rows="5" placeholder=".custom-class&#10;#custom-id&#10;div.custom > p"></textarea>
+        <div class="help-text">Add custom CSS selectors for specific elements you want to extract</div>
+      </div>
+
+      <div class="form-group">
+        <label for="excludedElements">Excluded Elements (CSS selectors)</label>
+        <input type="text" id="excludedElements" placeholder=".ads, .footer, .sidebar">
+        <div class="help-text">Elements to exclude from extraction (comma-separated)</div>
+      </div>
+
+      <div class="form-group">
+        <label for="excludedKeywords">Excluded Keywords</label>
+        <input type="text" id="excludedKeywords" placeholder="advertisement, sponsored, promo">
+        <div class="help-text">Keywords to exclude from extracted text (comma-separated)</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Product Extraction Settings</h2>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="extractProductImages">
+          Extract Product Images
+        </label>
+        <div class="help-text">Include product images in extraction results</div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="extractProductSpecs">
+          Extract Product Specifications
+        </label>
+        <div class="help-text">Include detailed product specifications when available</div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="extractProductReviews">
+          Extract Product Reviews
+        </label>
+        <div class="help-text">Include product reviews in extraction results</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="export-tab">
+    <div class="section">
+      <h2>Export Settings</h2>
+
+      <div class="form-group">
+        <label for="csvDelimiter">CSV Delimiter</label>
+        <select id="csvDelimiter">
+          <option value=",">Comma (,)</option>
+          <option value=";">Semicolon (;)</option>
+          <option value="\t">Tab</option>
+          <option value="|">Pipe (|)</option>
+        </select>
+        <div class="help-text">Character used to separate values in CSV files</div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="includeHeaders">
+          Include headers in CSV export
+        </label>
+        <div class="help-text">Add column headers to the first row of CSV files</div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="autoDownload">
+          Auto-download extracted data
+        </label>
+        <div class="help-text">Automatically download data after extraction</div>
+      </div>
+
+      <div class="form-group">
+        <label for="exportFilename">Export Filename Pattern</label>
+        <input type="text" id="exportFilename" placeholder="myscraper_data_{date}_{type}">
+        <div class="help-text">
+          Available variables: {date}, {time}, {type}, {url}<br>
+          Example: myscraper_{date}_{type} → myscraper_2023-11-15_products.csv
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="exportFormat">Preview Filename</label>
+        <div id="filenamePreview" class="export-preview">myscraper_data_2023-11-15_products.csv</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Google Sheets Integration</h2>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="enableGoogleSheets">
+          Enable Google Sheets Export
+        </label>
+        <div class="help-text">Allow direct export to Google Sheets</div>
+      </div>
+
+      <div class="form-group">
+        <label for="defaultSheetName">Default Sheet Name</label>
+        <input type="text" id="defaultSheetName" placeholder="MyScraper Data">
+        <div class="help-text">Default name for new Google Sheets</div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="createNewSheet">
+          Always Create New Sheet
+        </label>
+        <div class="help-text">Create a new sheet instead of appending to existing ones</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="advanced-tab">
+    <div class="section">
+      <h2>Scraping Behavior</h2>
+
+      <div class="form-group">
+        <label for="requestDelay">Request Delay (ms)</label>
+        <input type="number" id="requestDelay" min="0" max="5000" step="100">
+        <div class="help-text">Delay between requests during bulk scraping (0-5000ms)</div>
+      </div>
+
+      <div class="form-group">
+        <label for="maxConcurrent">Max Concurrent Requests</label>
+        <input type="number" id="maxConcurrent" min="1" max="10" step="1">
+        <div class="help-text">Maximum number of simultaneous requests (1-10)</div>
+      </div>
+
+      <div class="form-group">
+        <label for="timeout">Request Timeout (ms)</label>
+        <input type="number" id="timeout" min="5000" max="60000" step="1000" value="30000">
+        <div class="help-text">How long to wait for a request to complete (5-60 seconds)</div>
+      </div>
+
+      <div class="form-group">
+        <label for="retryCount">Retry Count</label>
+        <input type="number" id="retryCount" min="0" max="5" step="1" value="3">
+        <div class="help-text">Number of times to retry failed requests (0-5)</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Proxy Settings</h2>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="proxyEnabled">
+          Enable Proxy for Bulk Scraping
+        </label>
+        <div class="help-text">Use a proxy server for bulk scraping operations</div>
+      </div>
+
+      <div class="form-group">
+        <label for="proxyType">Proxy Type</label>
+        <select id="proxyType">
+          <option value="http">HTTP</option>
+          <option value="https">HTTPS</option>
+          <option value="socks4">SOCKS4</option>
+          <option value="socks5">SOCKS5</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="proxyHost">Proxy Host</label>
+        <input type="text" id="proxyHost" placeholder="proxy.example.com">
+      </div>
+
+      <div class="form-group">
+        <label for="proxyPort">Proxy Port</label>
+        <input type="number" id="proxyPort" min="1" max="65535">
+      </div>
+
+      <div class="form-group">
+        <label for="proxyUsername">Proxy Username (optional)</label>
+        <input type="text" id="proxyUsername">
+      </div>
+
+      <div class="form-group">
+        <label for="proxyPassword">Proxy Password (optional)</label>
+        <input type="password" id="proxyPassword">
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>User Agent</h2>
+
+      <div class="form-group">
+        <label for="userAgent">Custom User Agent</label>
+        <input type="text" id="userAgent" placeholder="Leave empty for default">
+        <div class="help-text">Custom user agent string for HTTP requests</div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="rotateUserAgent">
+          Rotate User Agent
+        </label>
+        <div class="help-text">Use different user agents for each request</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Domain Restrictions</h2>
+
+      <div class="form-group">
+        <label for="excludedDomains">Excluded Domains (one per line)</label>
+        <textarea id="excludedDomains" rows="5"></textarea>
+        <div class="help-text">Domains where scraping should be disabled</div>
+      </div>
+
+      <div class="form-group">
+        <label for="allowedDomains">Allowed Domains (one per line)</label>
+        <textarea id="allowedDomains" rows="5"></textarea>
+        <div class="help-text">If specified, scraping will only work on these domains</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Data Management</h2>
+
+      <div class="form-group">
+        <label for="maxDataAge">Maximum Data Age (days)</label>
+        <input type="number" id="maxDataAge" min="1" max="365" value="30">
+        <div class="help-text">Automatically delete data older than this many days</div>
+      </div>
+
+      <div class="form-group">
+        <label for="maxDataSize">Maximum Data Size (MB)</label>
+        <input type="number" id="maxDataSize" min="1" max="100" value="10">
+        <div class="help-text">Maximum size of stored data before cleanup</div>
+      </div>
+
+      <div class="button-group">
+        <button id="clearData" class="danger-button">Clear All Scraped Data</button>
+        <button id="exportSettings" class="secondary-button">Export Settings</button>
+        <button id="importSettings" class="secondary-button">Import Settings</button>
+      </div>
+      <input type="file" id="settingsFile" style="display: none;" accept=".json">
+    </div>
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <div class="button-group">
+    <button id="saveOptions">Save Options</button>
+    <button id="resetOptions" class="secondary-button">Reset to Defaults</button>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
