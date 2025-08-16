@@ -2,81 +2,81 @@ document.addEventListener('DOMContentLoaded', function() {
   // Tab functionality
   const tabs = document.querySelectorAll('.tab');
   const tabContents = document.querySelectorAll('.tab-content');
-  
+
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       // Remove active class from all tabs and contents
       tabs.forEach(t => t.classList.remove('active'));
       tabContents.forEach(c => c.classList.remove('active'));
-      
+
       // Add active class to clicked tab
       tab.classList.add('active');
-      
+
       // Get tab ID and show corresponding content
       const tabId = tab.getAttribute('data-tab');
       document.getElementById(`${tabId}-tab`).classList.add('active');
     });
   });
-  
+
   // Load saved options
   loadOptions();
-  
+
   // Save options
   document.getElementById('saveOptions').addEventListener('click', saveOptions);
-  
+
   // Reset options
   document.getElementById('resetOptions').addEventListener('click', resetOptions);
-  
+
   // Clear data
   document.getElementById('clearData').addEventListener('click', clearData);
-  
+
   // Save schedule
   document.getElementById('saveSchedule').addEventListener('click', saveSchedule);
-  
+
   // Export settings
   document.getElementById('exportSettings').addEventListener('click', exportSettings);
-  
+
   // Import settings
   document.getElementById('importSettings').addEventListener('click', () => {
     document.getElementById('settingsFile').click();
   });
-  
+
   document.getElementById('settingsFile').addEventListener('change', importSettings);
-  
+
   // Update filename preview
   updateFilenamePreview();
   document.getElementById('exportFilename').addEventListener('input', updateFilenamePreview);
-  
+
   // Proxy settings toggle
   document.getElementById('proxyEnabled').addEventListener('change', function() {
     const proxyFields = [
-      'proxyType', 'proxyHost', 'proxyPort', 
+      'proxyType', 'proxyHost', 'proxyPort',
       'proxyUsername', 'proxyPassword'
     ];
-    
+
     proxyFields.forEach(fieldId => {
       document.getElementById(fieldId).disabled = !this.checked;
     });
   });
-  
+
   // Google Sheets settings toggle
   document.getElementById('enableGoogleSheets').addEventListener('change', function() {
     const sheetsFields = [
       'defaultSheetName', 'createNewSheet'
     ];
-    
+
     sheetsFields.forEach(fieldId => {
       document.getElementById(fieldId).disabled = !this.checked;
     });
   });
-  
+
   // Schedule settings toggle
   document.getElementById('scheduleEnabled').addEventListener('change', function() {
     const scheduleFields = [
-      'scheduleFrequency', 'scheduleUrls', 'scheduleDataType', 
+      'scheduleFrequency', 'scheduleUrls', 'scheduleDataType',
       'scheduleTime', 'scheduleDayOfWeek'
     ];
-    
+
     scheduleFields.forEach(fieldId => {
       document.getElementById(fieldId).disabled = !this.checked;
     });
@@ -93,7 +93,7 @@ function loadOptions() {
     autoDetect: true,
     enableManualSelection: true,
     sidebarPosition: 'right',
-    
+
     // Schedule settings
     scheduleEnabled: false,
     scheduleFrequency: 'daily',
@@ -101,7 +101,7 @@ function loadOptions() {
     scheduleDataType: 'all',
     scheduleTime: '09:00',
     scheduleDayOfWeek: '1',
-    
+
     // Extraction settings
     extractEmailsOpt: true,
     extractPhonesOpt: true,
@@ -119,7 +119,7 @@ function loadOptions() {
     extractProductImages: true,
     extractProductSpecs: true,
     extractProductReviews: false,
-    
+
     // Export settings
     csvDelimiter: ',',
     includeHeaders: true,
@@ -128,7 +128,7 @@ function loadOptions() {
     enableGoogleSheets: false,
     defaultSheetName: 'MyScraper Data',
     createNewSheet: false,
-    
+
     // Advanced settings
     requestDelay: 500,
     maxConcurrent: 3,
@@ -155,7 +155,7 @@ function loadOptions() {
     document.getElementById('autoDetect').checked = items.autoDetect;
     document.getElementById('enableManualSelection').checked = items.enableManualSelection;
     document.getElementById('sidebarPosition').value = items.sidebarPosition;
-    
+
     // Schedule settings
     document.getElementById('scheduleEnabled').checked = items.scheduleEnabled;
     document.getElementById('scheduleFrequency').value = items.scheduleFrequency;
@@ -163,7 +163,7 @@ function loadOptions() {
     document.getElementById('scheduleDataType').value = items.scheduleDataType;
     document.getElementById('scheduleTime').value = items.scheduleTime;
     document.getElementById('scheduleDayOfWeek').value = items.scheduleDayOfWeek;
-    
+
     // Extraction settings
     document.getElementById('extractEmailsOpt').checked = items.extractEmailsOpt;
     document.getElementById('extractPhonesOpt').checked = items.extractPhonesOpt;
@@ -181,7 +181,7 @@ function loadOptions() {
     document.getElementById('extractProductImages').checked = items.extractProductImages;
     document.getElementById('extractProductSpecs').checked = items.extractProductSpecs;
     document.getElementById('extractProductReviews').checked = items.extractProductReviews;
-    
+
     // Export settings
     document.getElementById('csvDelimiter').value = items.csvDelimiter;
     document.getElementById('includeHeaders').checked = items.includeHeaders;
@@ -190,7 +190,7 @@ function loadOptions() {
     document.getElementById('enableGoogleSheets').checked = items.enableGoogleSheets;
     document.getElementById('defaultSheetName').value = items.defaultSheetName;
     document.getElementById('createNewSheet').checked = items.createNewSheet;
-    
+
     // Advanced settings
     document.getElementById('requestDelay').value = items.requestDelay;
     document.getElementById('maxConcurrent').value = items.maxConcurrent;
@@ -208,12 +208,12 @@ function loadOptions() {
     document.getElementById('allowedDomains').value = items.allowedDomains;
     document.getElementById('maxDataAge').value = items.maxDataAge;
     document.getElementById('maxDataSize').value = items.maxDataSize;
-    
+
     // Update field states
     document.getElementById('proxyEnabled').dispatchEvent(new Event('change'));
     document.getElementById('enableGoogleSheets').dispatchEvent(new Event('change'));
     document.getElementById('scheduleEnabled').dispatchEvent(new Event('change'));
-    
+
     // Update filename preview
     updateFilenamePreview();
   });
@@ -228,7 +228,7 @@ function saveOptions() {
   const autoDetect = document.getElementById('autoDetect').checked;
   const enableManualSelection = document.getElementById('enableManualSelection').checked;
   const sidebarPosition = document.getElementById('sidebarPosition').value;
-  
+
   // Schedule settings
   const scheduleEnabled = document.getElementById('scheduleEnabled').checked;
   const scheduleFrequency = document.getElementById('scheduleFrequency').value;
@@ -236,7 +236,7 @@ function saveOptions() {
   const scheduleDataType = document.getElementById('scheduleDataType').value;
   const scheduleTime = document.getElementById('scheduleTime').value;
   const scheduleDayOfWeek = document.getElementById('scheduleDayOfWeek').value;
-  
+
   // Extraction settings
   const extractEmailsOpt = document.getElementById('extractEmailsOpt').checked;
   const extractPhonesOpt = document.getElementById('extractPhonesOpt').checked;
@@ -254,7 +254,7 @@ function saveOptions() {
   const extractProductImages = document.getElementById('extractProductImages').checked;
   const extractProductSpecs = document.getElementById('extractProductSpecs').checked;
   const extractProductReviews = document.getElementById('extractProductReviews').checked;
-  
+
   // Export settings
   const csvDelimiter = document.getElementById('csvDelimiter').value;
   const includeHeaders = document.getElementById('includeHeaders').checked;
@@ -263,7 +263,7 @@ function saveOptions() {
   const enableGoogleSheets = document.getElementById('enableGoogleSheets').checked;
   const defaultSheetName = document.getElementById('defaultSheetName').value;
   const createNewSheet = document.getElementById('createNewSheet').checked;
-  
+
   // Advanced settings
   const requestDelay = parseInt(document.getElementById('requestDelay').value);
   const maxConcurrent = parseInt(document.getElementById('maxConcurrent').value);
@@ -281,48 +281,48 @@ function saveOptions() {
   const allowedDomains = document.getElementById('allowedDomains').value;
   const maxDataAge = parseInt(document.getElementById('maxDataAge').value);
   const maxDataSize = parseInt(document.getElementById('maxDataSize').value);
-  
+
   // Validate settings
   if (notificationTimeout < 1000 || notificationTimeout > 10000) {
     showStatus('Notification timeout must be between 1000 and 10000ms', 'error');
     return;
   }
-  
+
   if (requestDelay < 0 || requestDelay > 5000) {
     showStatus('Request delay must be between 0 and 5000ms', 'error');
     return;
   }
-  
+
   if (maxConcurrent < 1 || maxConcurrent > 10) {
     showStatus('Max concurrent requests must be between 1 and 10', 'error');
     return;
   }
-  
+
   if (timeout < 5000 || timeout > 60000) {
     showStatus('Request timeout must be between 5 and 60 seconds', 'error');
     return;
   }
-  
+
   if (retryCount < 0 || retryCount > 5) {
     showStatus('Retry count must be between 0 and 5', 'error');
     return;
   }
-  
+
   if (proxyEnabled && proxyPort < 1 || proxyPort > 65535) {
     showStatus('Proxy port must be between 1 and 65535', 'error');
     return;
   }
-  
+
   if (maxDataAge < 1 || maxDataAge > 365) {
     showStatus('Maximum data age must be between 1 and 365 days', 'error');
     return;
   }
-  
+
   if (maxDataSize < 1 || maxDataSize > 100) {
     showStatus('Maximum data size must be between 1 and 100 MB', 'error');
     return;
   }
-  
+
   // Save settings
   chrome.storage.sync.set({
     // General settings
@@ -333,7 +333,7 @@ function saveOptions() {
     autoDetect,
     enableManualSelection,
     sidebarPosition,
-    
+
     // Schedule settings
     scheduleEnabled,
     scheduleFrequency,
@@ -341,7 +341,7 @@ function saveOptions() {
     scheduleDataType,
     scheduleTime,
     scheduleDayOfWeek,
-    
+
     // Extraction settings
     extractEmailsOpt,
     extractPhonesOpt,
@@ -359,7 +359,7 @@ function saveOptions() {
     extractProductImages,
     extractProductSpecs,
     extractProductReviews,
-    
+
     // Export settings
     csvDelimiter,
     includeHeaders,
@@ -368,7 +368,7 @@ function saveOptions() {
     enableGoogleSheets,
     defaultSheetName,
     createNewSheet,
-    
+
     // Advanced settings
     requestDelay,
     maxConcurrent,
@@ -388,7 +388,7 @@ function saveOptions() {
     maxDataSize
   }, function() {
     showStatus('Options saved successfully!', 'success');
-    
+
     // Notify background script about settings changes
     chrome.runtime.sendMessage({
       action: 'settingsUpdated',
@@ -428,13 +428,13 @@ function saveSchedule() {
   const scheduleDataType = document.getElementById('scheduleDataType').value;
   const scheduleTime = document.getElementById('scheduleTime').value;
   const scheduleDayOfWeek = document.getElementById('scheduleDayOfWeek').value;
-  
+
   // Validate schedule
   if (scheduleEnabled && !scheduleUrls.trim()) {
     showStatus('Please enter at least one URL for scheduled scraping', 'error');
     return;
   }
-  
+
   // Save schedule settings
   chrome.storage.sync.set({
     scheduleEnabled,
@@ -445,7 +445,7 @@ function saveSchedule() {
     scheduleDayOfWeek
   }, function() {
     showStatus('Schedule saved successfully!', 'success');
-    
+
     // Notify background script about schedule changes
     chrome.runtime.sendMessage({
       action: 'scheduleUpdated',
@@ -465,14 +465,14 @@ function exportSettings() {
   chrome.storage.sync.get(null, function(items) {
     const dataStr = JSON.stringify(items, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
+
     const exportFileDefaultName = 'myscraper_settings_' + new Date().toISOString().slice(0, 10) + '.json';
-    
+
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
-    
+
     showStatus('Settings exported successfully', 'success');
   });
 }
@@ -480,22 +480,22 @@ function exportSettings() {
 function importSettings() {
   const file = document.getElementById('settingsFile').files[0];
   if (!file) return;
-  
+
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const settings = JSON.parse(e.target.result);
-      
+
       // Validate settings
       if (typeof settings !== 'object' || settings === null) {
         throw new Error('Invalid settings file');
       }
-      
+
       // Save imported settings
       chrome.storage.sync.set(settings, function() {
         loadOptions();
         showStatus('Settings imported successfully', 'success');
-        
+
         // Notify background script about settings changes
         if (settings.scheduleEnabled) {
           chrome.runtime.sendMessage({
@@ -521,19 +521,19 @@ function importSettings() {
 function updateFilenamePreview() {
   const pattern = document.getElementById('exportFilename').value;
   const format = document.getElementById('defaultExport').value;
-  
+
   // Replace placeholders
   let filename = pattern
     .replace('{date}', new Date().toISOString().slice(0, 10))
     .replace('{time}', new Date().toISOString().slice(11, 19).replace(/:/g, '-'))
     .replace('{type}', 'products')
     .replace('{url}', 'example-com');
-  
+
   // Add file extension
   if (!filename.endsWith(`.${format}`)) {
     filename += `.${format}`;
   }
-  
+
   document.getElementById('filenamePreview').textContent = filename;
 }
 
@@ -542,7 +542,7 @@ function showStatus(message, type) {
   statusEl.textContent = message;
   statusEl.className = `status ${type}`;
   statusEl.style.display = 'block';
-  
+
   setTimeout(() => {
     statusEl.style.display = 'none';
   }, 3000);
